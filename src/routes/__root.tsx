@@ -29,14 +29,18 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
+      { title: "BookMRKED" },
+      { name: "description", content: "Save every spot worth revisiting. Build your own certified collections across food, coffee, art, music and more. Early access now open." },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { property: "og:title", content: "BookMRKED" },
+      { property: "og:description", content: "Save every spot worth revisiting. Build your own certified collections across food, coffee, art, music and more. Early access now open." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "BookMRKED" },
+      { name: "twitter:description", content: "Save every spot worth revisiting. Build your own certified collections across food, coffee, art, music and more. Early access now open." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/56f30d87-e3b2-451d-be0d-54c8528fdc9c/id-preview-895c5fe7--c06f3a43-318f-48fc-a0cd-42b5013a068d.lovable.app-1776534544936.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/56f30d87-e3b2-451d-be0d-54c8528fdc9c/id-preview-895c5fe7--c06f3a43-318f-48fc-a0cd-42b5013a068d.lovable.app-1776534544936.png" },
     ],
     links: [
       {
