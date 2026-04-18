@@ -71,14 +71,18 @@ function Landing() {
         <div className="mx-auto max-w-5xl">
           <div className="flex items-center gap-2 font-mono-tag text-ink-muted">
             <Bookmark className="h-3.5 w-3.5 text-gold" strokeWidth={2.5} />
-            <span>Bookmrked · Early Access</span>
+            <span>Early Access</span>
           </div>
 
-          <h1 className="font-display mt-8 text-[clamp(3rem,9vw,6.5rem)] leading-[0.95] tracking-tight text-ink">
+          <h1 className="font-display mt-6 text-[clamp(4.5rem,16vw,11rem)] font-semibold leading-[0.85] tracking-[-0.04em] text-ink">
+            Bookmrked
+          </h1>
+
+          <h2 className="font-display mt-8 text-[clamp(2rem,6vw,4rem)] leading-[0.95] tracking-tight text-ink-muted">
             Save it. <span className="italic text-gold">Visit it.</span>
             <br />
             Come back to it.
-          </h1>
+          </h2>
 
           <p className="mt-7 max-w-xl text-lg leading-relaxed text-ink-muted sm:text-xl">
             A quiet, deliberate place to keep the spots worth remembering — the coffee, the
@@ -304,9 +308,9 @@ function Landing() {
         <div className="mx-auto mt-24 flex max-w-5xl items-center justify-between border-t border-border pt-8 font-mono-tag text-ink-muted">
           <div className="flex items-center gap-2">
             <Bookmark className="h-3.5 w-3.5 text-gold" strokeWidth={2.5} />
-            Bookmrked
+            bookmrked.com
           </div>
-          <div>© {new Date().getFullYear()}</div>
+          <div>© {new Date().getFullYear()} Bookmrked</div>
         </div>
       </section>
     </main>
