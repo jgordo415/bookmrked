@@ -20,12 +20,6 @@ export function AuthModal({
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
 
-  // Keep input synced when defaultEmail changes between opens
-  if (defaultEmail && defaultEmail !== email && status === "idle") {
-    // one-time sync on first render with a default
-    setEmail(defaultEmail);
-  }
-
   const sendMagicLink = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
