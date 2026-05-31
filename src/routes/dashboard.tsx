@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
 import { Bookmark, Plus } from "lucide-react";
-import { AuthModal } from "@/components/AuthModal";
 
 export const Route = createFileRoute("/dashboard")({
   component: Dashboard,
@@ -13,7 +12,6 @@ function Dashboard() {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [createOpen, setCreateOpen] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -70,11 +68,11 @@ function Dashboard() {
           </p>
 
           <button
-            onClick={() => setCreateOpen(true)}
-            className="mt-8 inline-flex items-center gap-2 rounded-md bg-gold px-6 py-3 text-base font-medium text-primary-foreground transition-transform hover:-translate-y-px"
+            disabled
+            className="mt-8 inline-flex items-center gap-2 rounded-md bg-gold/60 px-6 py-3 text-base font-medium text-primary-foreground"
           >
             <Plus className="h-4 w-4" strokeWidth={2.5} />
-            Create a collection
+            Create a collection — coming soon
           </button>
         </div>
 
@@ -83,15 +81,6 @@ function Dashboard() {
           <p className="mt-2 text-ink">Your saved spots will live here.</p>
         </div>
       </div>
-
-      {/* Re-uses the same modal — gracefully asks user to confirm before we wire creation */}
-      <AuthModal
-        open={createOpen}
-        onOpenChange={setCreateOpen}
-        defaultEmail={user.email ?? ""}
-        title="Coming soon"
-        description="Collection creation is rolling out next. You're all set up — we'll let you know."
-      />
     </main>
   );
 }
