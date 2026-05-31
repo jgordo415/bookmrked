@@ -14,7 +14,151 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      collections: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string | null
+          id: string
+          privacy: string
+          share_token: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          privacy?: string
+          share_token?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          privacy?: string
+          share_token?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collections_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      locations: {
+        Row: {
+          address: string | null
+          category: string | null
+          city: string | null
+          collection_id: string
+          created_at: string
+          id: string
+          name: string
+          notes: string | null
+        }
+        Insert: {
+          address?: string | null
+          category?: string | null
+          city?: string | null
+          collection_id: string
+          created_at?: string
+          id?: string
+          name: string
+          notes?: string | null
+        }
+        Update: {
+          address?: string | null
+          category?: string | null
+          city?: string | null
+          collection_id?: string
+          created_at?: string
+          id?: string
+          name?: string
+          notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "locations_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      users: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          subscription_tier: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id: string
+          subscription_tier?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          subscription_tier?: string
+        }
+        Relationships: []
+      }
+      visits: {
+        Row: {
+          id: string
+          location_id: string
+          note: string | null
+          star_rating: number | null
+          user_id: string
+          visited_at: string
+        }
+        Insert: {
+          id?: string
+          location_id: string
+          note?: string | null
+          star_rating?: number | null
+          user_id: string
+          visited_at?: string
+        }
+        Update: {
+          id?: string
+          location_id?: string
+          note?: string | null
+          star_rating?: number | null
+          user_id?: string
+          visited_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "visits_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "visits_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
