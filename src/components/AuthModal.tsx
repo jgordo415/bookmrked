@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
@@ -19,6 +19,14 @@ export function AuthModal({
   const [email, setEmail] = useState(defaultEmail);
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
+
+  useEffect(() => {
+    if (open) {
+      setEmail(defaultEmail);
+      setStatus("idle");
+      setErrorMsg("");
+    }
+  }, [open, defaultEmail]);
 
   const sendMagicLink = async (e: React.FormEvent) => {
     e.preventDefault();
