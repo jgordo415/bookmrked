@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Check, Star, MapPin, Bookmark } from "lucide-react";
+import { AuthModal } from "@/components/AuthModal";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -327,72 +328,36 @@ function EmailCapture({
   className?: string;
 }) {
   const [email, setEmail] = useState("");
-  const [sent, setSent] = useState(false);
-  const iframeName = `mc-iframe-${id}`;
+  const [open, setOpen] = useState(false);
 
   return (
     <>
-      {/* Hidden iframe target keeps Mailchimp's POST from navigating the page */}
-      <iframe
-        name={iframeName}
-        title="Mailchimp submission target"
-        style={{ display: "none" }}
-        aria-hidden="true"
-      />
-    <form
-      action="https://gmail.us19.list-manage.com/subscribe/post?u=fefa59a66a5023c817e62341c&id=bef8442262&f_id=009c88e4f0"
-      method="post"
-      target={iframeName}
-      noValidate
-      onSubmit={() => {
-        if (!email) return;
-        // Let the browser submit into the hidden iframe, then flip to success.
-        setTimeout(() => setSent(true), 0);
-      }}
-      className={`flex flex-col gap-3 sm:flex-row sm:items-stretch ${className}`}
-    >
-      <label htmlFor={id} className="sr-only">
-        Email address
-      </label>
-      <input
-        id={id}
-        name="EMAIL"
-        type="email"
-        required
-        value={email}
-        onChange={(e) => {
-          setEmail(e.target.value);
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          setOpen(true);
         }}
-        placeholder="you@somewhere.com"
-        disabled={sent}
-        className="flex-1 rounded-md border border-border bg-surface/70 px-4 py-3.5 text-base text-ink placeholder:text-ink-muted/70 outline-none transition-colors focus:border-gold focus:ring-2 focus:ring-gold/30"
-      />
-      {/* Mailchimp anti-bot honeypot — must remain empty and hidden */}
-      <div style={{ position: "absolute", left: "-5000px" }} aria-hidden="true">
+        className={`flex flex-col gap-3 sm:flex-row sm:items-stretch ${className}`}
+      >
+        <label htmlFor={id} className="sr-only">
+          Email address
+        </label>
         <input
-          type="text"
-          name="b_fefa59a66a5023c817e62341c_bef8442262"
-          tabIndex={-1}
-          defaultValue=""
+          id={id}
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="you@somewhere.com"
+          className="flex-1 rounded-md border border-border bg-surface/70 px-4 py-3.5 text-base text-ink placeholder:text-ink-muted/70 outline-none transition-colors focus:border-gold focus:ring-2 focus:ring-gold/30"
         />
-      </div>
-      <button
-        type="submit"
-        disabled={sent}
-        className="rounded-md bg-gold px-6 py-3.5 text-base font-medium text-primary-foreground transition-transform hover:-translate-y-px active:translate-y-0"
-      >
-        {sent ? "You're on the list ✓" : cta}
-      </button>
-    </form>
-    {sent && (
-      <p
-        role="status"
-        aria-live="polite"
-        className={`mt-4 font-mono-tag text-gold ${className.includes("text-center") || className.includes("mx-auto") ? "text-center" : ""}`}
-      >
-        You're on the list — we'll be in touch.
-      </p>
-    )}
+        <button
+          type="submit"
+          className="rounded-md bg-gold px-6 py-3.5 text-base font-medium text-primary-foreground transition-transform hover:-translate-y-px active:translate-y-0"
+        >
+          {cta}
+        </button>
+      </form>
+      <AuthModal open={open} onOpenChange={setOpen} defaultEmail={email} />
     </>
   );
 }
