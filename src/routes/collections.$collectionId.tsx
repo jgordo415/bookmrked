@@ -54,8 +54,10 @@ function CollectionDetail() {
         .from("visits")
         .select("location_id")
         .eq("user_id", uid)
-        .in("id", []) // ignored; below uses location_id filter
-        .or(`location_id.in.(${list.map((p) => p.id).join(",")})`);
+        .in(
+          "location_id",
+          list.map((p) => p.id),
+        );
       setVisitedIds(new Set((visits ?? []).map((v) => v.location_id)));
     },
     [collectionId],
