@@ -1,8 +1,9 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Plus, MapPin } from "lucide-react";
+import { ArrowLeft, Plus, MapPin, Check, Star } from "lucide-react";
 import { AddPlaceModal } from "@/components/AddPlaceModal";
+import { MarkVisitedModal, type VisitData } from "@/components/MarkVisitedModal";
 
 export const Route = createFileRoute("/collections/$collectionId")({
   component: CollectionDetail,
@@ -32,9 +33,9 @@ function CollectionDetail() {
   const [notFound, setNotFound] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [places, setPlaces] = useState<Place[]>([]);
-  const [visitedIds, setVisitedIds] = useState<Set<string>>(new Set());
+  const [visits, setVisits] = useState<Record<string, VisitData>>({});
   const [addOpen, setAddOpen] = useState(false);
-  const [markingId, setMarkingId] = useState<string | null>(null);
+  const [markPlace, setMarkPlace] = useState<Place | null>(null);
 
   const loadPlaces = useCallback(
     async (uid: string) => {
@@ -47,18 +48,26 @@ function CollectionDetail() {
       setPlaces(list);
 
       if (list.length === 0) {
-        setVisitedIds(new Set());
+        setVisits({});
         return;
       }
-      const { data: visits } = await supabase
+      const { data: visitRows } = await supabase
         .from("visits")
-        .select("location_id")
+        .select("location_id, star_rating, note, visited_at")
         .eq("user_id", uid)
         .in(
           "location_id",
           list.map((p) => p.id),
         );
-      setVisitedIds(new Set((visits ?? []).map((v) => v.location_id)));
+      const map: Record<string, VisitData> = {};
+      for (const v of visitRows ?? []) {
+        map[v.location_id] = {
+          star_rating: v.star_rating ?? 0,
+          note: v.note,
+          visited_at: v.visited_at,
+        };
+      }
+      setVisits(map);
     },
     [collectionId],
   );
@@ -91,19 +100,6 @@ function CollectionDetail() {
     return () => { active = false; };
   }, [collectionId, navigate, loadPlaces]);
 
-  const handleMarkVisited = async (placeId: string) => {
-    if (!userId || visitedIds.has(placeId)) return;
-    setMarkingId(placeId);
-    const { error } = await supabase.from("visits").insert({
-      location_id: placeId,
-      user_id: userId,
-    });
-    setMarkingId(null);
-    if (!error) {
-      setVisitedIds((prev) => new Set(prev).add(placeId));
-    }
-  };
-
   if (loading) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-background">
@@ -124,7 +120,7 @@ function CollectionDetail() {
   }
 
   const total = places.length;
-  const visited = places.reduce((acc, p) => acc + (visitedIds.has(p.id) ? 1 : 0), 0);
+  const visited = places.reduce((acc, p) => acc + (visits[p.id] ? 1 : 0), 0);
   const pct = total === 0 ? 0 : Math.round((visited / total) * 100);
 
   return (
@@ -199,7 +195,8 @@ function CollectionDetail() {
             </div>
             <ul className="mt-6 space-y-3">
               {places.map((p) => {
-                const isVisited = visitedIds.has(p.id);
+                const visit = visits[p.id];
+                const isVisited = Boolean(visit);
                 return (
                   <li
                     key={p.id}
@@ -207,7 +204,14 @@ function CollectionDetail() {
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="min-w-0">
-                        <div className="font-display text-2xl text-ink">{p.name}</div>
+                        <div className="flex items-center gap-2">
+                          {isVisited && (
+                            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-gold text-primary-foreground">
+                              <Check className="h-3 w-3" strokeWidth={3} />
+                            </span>
+                          )}
+                          <div className="font-display text-2xl text-ink">{p.name}</div>
+                        </div>
                         <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-ink-muted">
                           {p.city && (
                             <span className="inline-flex items-center gap-1">
@@ -220,21 +224,41 @@ function CollectionDetail() {
                               {p.category}
                             </span>
                           )}
+                          {isVisited && visit.star_rating > 0 && (
+                            <span className="inline-flex items-center gap-0.5">
+                              {[1, 2, 3, 4, 5].map((n) => (
+                                <Star
+                                  key={n}
+                                  className={`h-3.5 w-3.5 ${
+                                    n <= visit.star_rating
+                                      ? "fill-gold text-gold"
+                                      : "text-ink-muted/40"
+                                  }`}
+                                  strokeWidth={1.5}
+                                />
+                              ))}
+                            </span>
+                          )}
                         </div>
                         {p.notes && (
                           <p className="mt-3 text-sm text-ink-muted">{p.notes}</p>
                         )}
+                        {isVisited && visit.note && (
+                          <p className="mt-2 text-sm italic text-ink-muted">
+                            “{visit.note}”
+                          </p>
+                        )}
                       </div>
                       <button
-                        onClick={() => handleMarkVisited(p.id)}
-                        disabled={isVisited || markingId === p.id}
+                        onClick={() => !isVisited && setMarkPlace(p)}
+                        disabled={isVisited}
                         className={`shrink-0 rounded-md px-3 py-2 text-xs font-medium transition ${
                           isVisited
                             ? "border border-gold/40 text-gold"
                             : "bg-gold text-primary-foreground hover:bg-gold-soft"
-                        } disabled:opacity-60`}
+                        } disabled:cursor-default disabled:opacity-100`}
                       >
-                        {isVisited ? "Visited" : markingId === p.id ? "Saving…" : "Mark Visited"}
+                        {isVisited ? "Visited ✓" : "Mark Visited"}
                       </button>
                     </div>
                   </li>
@@ -251,6 +275,22 @@ function CollectionDetail() {
             collectionId={collection.id}
             defaultCategory={collection.category}
             onCreated={() => loadPlaces(userId)}
+          />
+        )}
+
+        {userId && markPlace && (
+          <MarkVisitedModal
+            open={Boolean(markPlace)}
+            onOpenChange={(v) => {
+              if (!v) setMarkPlace(null);
+            }}
+            locationId={markPlace.id}
+            userId={userId}
+            placeName={markPlace.name}
+            onSaved={(data) => {
+              setVisits((prev) => ({ ...prev, [markPlace.id]: data }));
+              setMarkPlace(null);
+            }}
           />
         )}
       </div>
