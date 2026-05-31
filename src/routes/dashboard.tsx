@@ -149,7 +149,6 @@ function Dashboard() {
               Coffee shops, galleries, bookstores, hidden bars — gather the spots
               you'll keep coming back to.
             </p>
-            <button className="mt-8 inline-flex items-center gap-2 rounded-md bg-gold px-6 py-3 text-sm font-medium text-primary-foreground transition hover:bg-gold-soft">
             <button
               onClick={() => setCreateOpen(true)}
               className="mt-8 inline-flex items-center gap-2 rounded-md bg-gold px-6 py-3 text-sm font-medium text-primary-foreground transition hover:bg-gold-soft"
