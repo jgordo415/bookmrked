@@ -191,6 +191,12 @@ function Dashboard() {
           <NavItem icon={<UserIcon className="h-5 w-5" />} label="Profile" />
         </div>
       </nav>
+
+      <CreateCollectionModal
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        userId={user.id}
+      />
     </main>
   );
 }
