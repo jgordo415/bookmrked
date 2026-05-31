@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
@@ -160,9 +160,11 @@ function Dashboard() {
         ) : (
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {collections.map((c) => (
-              <article
+              <Link
                 key={c.id}
-                className="group rounded-xl border border-border bg-surface p-6 transition hover:border-gold/60 hover:bg-surface-raised"
+                to="/collections/$collectionId"
+                params={{ collectionId: c.id }}
+                className="group block rounded-xl border border-border bg-surface p-6 transition hover:border-gold/60 hover:bg-surface-raised"
               >
                 {c.category && (
                   <div className="font-mono-tag text-gold">{c.category}</div>
@@ -178,7 +180,7 @@ function Dashboard() {
                     style={{ width: `${c.completion}%` }}
                   />
                 </div>
-              </article>
+              </Link>
             ))}
           </div>
         )}
