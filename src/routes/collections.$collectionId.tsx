@@ -1,7 +1,8 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Plus, MapPin } from "lucide-react";
+import { AddPlaceModal } from "@/components/AddPlaceModal";
 
 export const Route = createFileRoute("/collections/$collectionId")({
   component: CollectionDetail,
@@ -15,12 +16,50 @@ type Collection = {
   privacy: string;
 };
 
+type Place = {
+  id: string;
+  name: string;
+  city: string | null;
+  category: string | null;
+  notes: string | null;
+};
+
 function CollectionDetail() {
   const { collectionId } = Route.useParams();
   const navigate = useNavigate();
   const [collection, setCollection] = useState<Collection | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [places, setPlaces] = useState<Place[]>([]);
+  const [visitedIds, setVisitedIds] = useState<Set<string>>(new Set());
+  const [addOpen, setAddOpen] = useState(false);
+  const [markingId, setMarkingId] = useState<string | null>(null);
+
+  const loadPlaces = useCallback(
+    async (uid: string) => {
+      const { data: locs } = await supabase
+        .from("locations")
+        .select("id, name, city, category, notes")
+        .eq("collection_id", collectionId)
+        .order("created_at", { ascending: false });
+      const list = (locs ?? []) as Place[];
+      setPlaces(list);
+
+      if (list.length === 0) {
+        setVisitedIds(new Set());
+        return;
+      }
+      const { data: visits } = await supabase
+        .from("visits")
+        .select("location_id")
+        .eq("user_id", uid)
+        .in("id", []) // ignored; below uses location_id filter
+        .or(`location_id.in.(${list.map((p) => p.id).join(",")})`);
+      setVisitedIds(new Set((visits ?? []).map((v) => v.location_id)));
+    },
+    [collectionId],
+  );
 
   useEffect(() => {
     let active = true;
@@ -30,18 +69,38 @@ function CollectionDetail() {
         navigate({ to: "/" });
         return;
       }
+      if (!active) return;
+      setUserId(user.id);
       const { data } = await supabase
         .from("collections")
         .select("id, title, description, category, privacy")
         .eq("id", collectionId)
         .maybeSingle();
       if (!active) return;
-      if (!data) setNotFound(true);
-      else setCollection(data);
+      if (!data) {
+        setNotFound(true);
+        setLoading(false);
+        return;
+      }
+      setCollection(data);
+      await loadPlaces(user.id);
       setLoading(false);
     })();
     return () => { active = false; };
-  }, [collectionId, navigate]);
+  }, [collectionId, navigate, loadPlaces]);
+
+  const handleMarkVisited = async (placeId: string) => {
+    if (!userId || visitedIds.has(placeId)) return;
+    setMarkingId(placeId);
+    const { error } = await supabase.from("visits").insert({
+      location_id: placeId,
+      user_id: userId,
+    });
+    setMarkingId(null);
+    if (!error) {
+      setVisitedIds((prev) => new Set(prev).add(placeId));
+    }
+  };
 
   if (loading) {
     return (
@@ -61,6 +120,10 @@ function CollectionDetail() {
       </main>
     );
   }
+
+  const total = places.length;
+  const visited = places.reduce((acc, p) => acc + (visitedIds.has(p.id) ? 1 : 0), 0);
+  const pct = total === 0 ? 0 : Math.round((visited / total) * 100);
 
   return (
     <main className="min-h-screen bg-background px-5 pb-28 pt-10 sm:px-8">
@@ -88,17 +151,106 @@ function CollectionDetail() {
           </div>
         </div>
 
-        <div className="mt-16 rounded-xl border border-dashed border-border bg-surface/40 p-12 text-center">
-          <MapPin className="mx-auto h-6 w-6 text-gold" strokeWidth={2} />
-          <h2 className="font-display mt-4 text-3xl text-ink">No places yet</h2>
-          <p className="mx-auto mt-2 max-w-sm text-ink-muted">
-            Start filling this collection with spots worth remembering.
-          </p>
-          <button className="mt-8 inline-flex items-center gap-2 rounded-md bg-gold px-6 py-3 text-sm font-medium text-primary-foreground transition hover:bg-gold-soft">
-            <Plus className="h-4 w-4" strokeWidth={2.5} />
-            Add a place
-          </button>
+        {/* Progress */}
+        <div className="mt-12">
+          <div className="flex items-baseline justify-between">
+            <span className="font-mono-tag text-ink-muted">Visited</span>
+            <span className="font-mono-tag text-ink">
+              {visited} / {total}
+            </span>
+          </div>
+          <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-surface-raised">
+            <div
+              className="h-full rounded-full bg-gold transition-all"
+              style={{ width: `${pct}%` }}
+            />
+          </div>
         </div>
+
+        {/* Places */}
+        {places.length === 0 ? (
+          <div className="mt-12 rounded-xl border border-dashed border-border bg-surface/40 p-12 text-center">
+            <MapPin className="mx-auto h-6 w-6 text-gold" strokeWidth={2} />
+            <h2 className="font-display mt-4 text-3xl text-ink">No places yet</h2>
+            <p className="mx-auto mt-2 max-w-sm text-ink-muted">
+              Start filling this collection with spots worth remembering.
+            </p>
+            <button
+              onClick={() => setAddOpen(true)}
+              className="mt-8 inline-flex items-center gap-2 rounded-md bg-gold px-6 py-3 text-sm font-medium text-primary-foreground transition hover:bg-gold-soft"
+            >
+              <Plus className="h-4 w-4" strokeWidth={2.5} />
+              Add a place
+            </button>
+          </div>
+        ) : (
+          <>
+            <div className="mt-10 flex items-center justify-between">
+              <h2 className="font-display text-2xl text-ink">Places</h2>
+              <button
+                onClick={() => setAddOpen(true)}
+                className="inline-flex items-center gap-2 rounded-md bg-gold px-4 py-2 text-sm font-medium text-primary-foreground transition hover:bg-gold-soft"
+              >
+                <Plus className="h-4 w-4" strokeWidth={2.5} />
+                Add a place
+              </button>
+            </div>
+            <ul className="mt-6 space-y-3">
+              {places.map((p) => {
+                const isVisited = visitedIds.has(p.id);
+                return (
+                  <li
+                    key={p.id}
+                    className="rounded-xl border border-border bg-surface/60 p-5"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="min-w-0">
+                        <div className="font-display text-2xl text-ink">{p.name}</div>
+                        <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-ink-muted">
+                          {p.city && (
+                            <span className="inline-flex items-center gap-1">
+                              <MapPin className="h-3.5 w-3.5" strokeWidth={2} />
+                              {p.city}
+                            </span>
+                          )}
+                          {p.category && (
+                            <span className="font-mono-tag rounded-full border border-border px-2 py-0.5 text-gold">
+                              {p.category}
+                            </span>
+                          )}
+                        </div>
+                        {p.notes && (
+                          <p className="mt-3 text-sm text-ink-muted">{p.notes}</p>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => handleMarkVisited(p.id)}
+                        disabled={isVisited || markingId === p.id}
+                        className={`shrink-0 rounded-md px-3 py-2 text-xs font-medium transition ${
+                          isVisited
+                            ? "border border-gold/40 text-gold"
+                            : "bg-gold text-primary-foreground hover:bg-gold-soft"
+                        } disabled:opacity-60`}
+                      >
+                        {isVisited ? "Visited" : markingId === p.id ? "Saving…" : "Mark Visited"}
+                      </button>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </>
+        )}
+
+        {userId && (
+          <AddPlaceModal
+            open={addOpen}
+            onOpenChange={setAddOpen}
+            collectionId={collection.id}
+            defaultCategory={collection.category}
+            onCreated={() => loadPlaces(userId)}
+          />
+        )}
       </div>
     </main>
   );
