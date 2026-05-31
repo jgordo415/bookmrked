@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
 import { Bookmark, Plus, Home, Compass, User as UserIcon, Lock } from "lucide-react";
+import { CreateCollectionModal } from "@/components/CreateCollectionModal";
 
 export const Route = createFileRoute("/dashboard")({
   component: Dashboard,
@@ -22,6 +23,7 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [collections, setCollections] = useState<CollectionCard[]>([]);
   const [collectionsLoading, setCollectionsLoading] = useState(true);
+  const [createOpen, setCreateOpen] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -126,6 +128,7 @@ function Dashboard() {
           </div>
           {collections.length > 0 && (
             <button
+              onClick={() => setCreateOpen(true)}
               className="inline-flex items-center gap-2 rounded-md bg-gold px-5 py-3 text-sm font-medium text-primary-foreground transition hover:bg-gold-soft"
             >
               <Plus className="h-4 w-4" strokeWidth={2.5} />
@@ -146,7 +149,10 @@ function Dashboard() {
               Coffee shops, galleries, bookstores, hidden bars — gather the spots
               you'll keep coming back to.
             </p>
-            <button className="mt-8 inline-flex items-center gap-2 rounded-md bg-gold px-6 py-3 text-sm font-medium text-primary-foreground transition hover:bg-gold-soft">
+            <button
+              onClick={() => setCreateOpen(true)}
+              className="mt-8 inline-flex items-center gap-2 rounded-md bg-gold px-6 py-3 text-sm font-medium text-primary-foreground transition hover:bg-gold-soft"
+            >
               <Plus className="h-4 w-4" strokeWidth={2.5} />
               Create collection
             </button>
@@ -185,6 +191,12 @@ function Dashboard() {
           <NavItem icon={<UserIcon className="h-5 w-5" />} label="Profile" />
         </div>
       </nav>
+
+      <CreateCollectionModal
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        userId={user.id}
+      />
     </main>
   );
 }
