@@ -75,6 +75,14 @@ function CollectionDetail() {
     [collectionId],
   );
 
+  const handleAddPlaceClick = () => {
+    if (places.length >= 15) {
+      setUpgradeOpen(true);
+    } else {
+      setAddOpen(true);
+    }
+  };
+
   useEffect(() => {
     let active = true;
     (async () => {
