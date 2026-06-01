@@ -198,13 +198,13 @@ function Dashboard() {
         )}
       </div>
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/90 backdrop-blur">
-        <div className="mx-auto flex max-w-md items-stretch justify-around px-2 py-2">
-          <NavItem icon={<Home className="h-5 w-5" />} label="Home" active />
-          <NavItem icon={<Compass className="h-5 w-5" />} label="Discover" locked />
-          <NavItem icon={<UserIcon className="h-5 w-5" />} label="Profile" />
-        </div>
-      </nav>
+      <BottomNav />
+
+      <UpgradeModal
+        open={upgradeOpen}
+        onOpenChange={setUpgradeOpen}
+        type="collections"
+      />
 
       <CreateCollectionModal
         open={createOpen}
@@ -212,38 +212,5 @@ function Dashboard() {
         userId={user.id}
       />
     </main>
-  );
-}
-
-function NavItem({
-  icon,
-  label,
-  active,
-  locked,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  active?: boolean;
-  locked?: boolean;
-}) {
-  return (
-    <button
-      disabled={locked}
-      className={`flex flex-1 flex-col items-center gap-1 rounded-md px-4 py-2 font-mono-tag transition ${
-        active
-          ? "text-gold"
-          : locked
-            ? "text-ink-muted/40"
-            : "text-ink-muted hover:text-ink"
-      }`}
-    >
-      <div className="relative">
-        {icon}
-        {locked && (
-          <Lock className="absolute -right-2 -top-1 h-3 w-3" strokeWidth={2.5} />
-        )}
-      </div>
-      {label}
-    </button>
   );
 }
