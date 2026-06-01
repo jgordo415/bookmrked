@@ -86,7 +86,7 @@ function Landing() {
             record store, the gallery you walked past twice and finally went in.
           </p>
 
-          <EmailCapture id="hero-email" cta="Get Early Access" className="mt-10" />
+          <EmailCapture id="hero-email" cta="Start your first collection" className="mt-10" />
 
           <div className="mt-6 font-mono-tag text-ink-muted">
             No spam. One email when we open the door.
