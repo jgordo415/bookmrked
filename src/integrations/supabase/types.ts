@@ -164,7 +164,30 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_shared_collection: {
+        Args: { _token: string }
+        Returns: {
+          category: string
+          description: string
+          id: string
+          privacy: string
+          share_token: string
+          title: string
+        }[]
+      }
+      get_shared_places: {
+        Args: { _token: string }
+        Returns: {
+          category: string
+          city: string
+          id: string
+          name: string
+          notes: string
+          star_rating: number
+          visit_note: string
+          visited: boolean
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
