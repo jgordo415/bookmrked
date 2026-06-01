@@ -40,7 +40,50 @@ function Dashboard() {
   const [deleteCollectionId, setDeleteCollectionId] = useState<string | null>(null);
   const [deleteCollectionTitle, setDeleteCollectionTitle] = useState("");
 
-  const loadCollections = async () => {
+  const handleDeleteCollection = async () => {
+    if (!deleteCollectionId || !user) return;
+    const { data: locs } = await supabase.from("locations").select("id").eq("collection_id", deleteCollectionId);
+    const locIds = (locs ?? []).map((l) => l.id);
+    if (locIds.length > 0) {
+      await supabase.from("visits").delete().in("location_id", locIds).eq("user_id", user.id);
+      await supabase.from("locations").delete().in("id", locIds);
+    }
+    await supabase.from("collections").delete().eq("id", deleteCollectionId);
+    setDeleteCollectionId(null);
+    setDeleteCollectionTitle("");
+    // reload collections
+    const { data: cols } = await supabase
+      .from("collections")
+      .select("id, title, category")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
+    if (!cols) {
+      setCollections([]);
+      return;
+    }
+    const ids = cols.map((c) => c.id);
+    const { data: newLocs } = ids.length
+      ? await supabase.from("locations").select("id, collection_id").in("collection_id", ids)
+      : { data: [] as { id: string; collection_id: string }[] };
+    const newLocIds = (newLocs ?? []).map((l) => l.id);
+    const { data: visits } = newLocIds.length
+      ? await supabase.from("visits").select("location_id").eq("user_id", user.id).in("location_id", newLocIds)
+      : { data: [] as { location_id: string }[] };
+    const visitedSet = new Set((visits ?? []).map((v) => v.location_id));
+    const cards: CollectionCard[] = cols.map((c) => {
+      const colLocs = (newLocs ?? []).filter((l) => l.collection_id === c.id);
+      const visited = colLocs.filter((l) => visitedSet.has(l.id)).length;
+      const completion = colLocs.length === 0 ? 0 : Math.round((visited / colLocs.length) * 100);
+      return {
+        id: c.id,
+        title: c.title,
+        category: c.category,
+        locationCount: colLocs.length,
+        completion,
+      };
+    });
+    setCollections(cards);
+  };
 
   useEffect(() => {
     let active = true;
