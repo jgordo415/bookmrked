@@ -185,7 +185,7 @@ function CollectionDetail() {
               Start filling this collection with spots worth remembering.
             </p>
             <button
-              onClick={() => setAddOpen(true)}
+              onClick={handleAddPlaceClick}
               className="mt-8 inline-flex items-center gap-2 rounded-md bg-gold px-6 py-3 text-sm font-medium text-primary-foreground transition hover:bg-gold-soft"
             >
               <Plus className="h-4 w-4" strokeWidth={2.5} />
@@ -197,7 +197,7 @@ function CollectionDetail() {
             <div className="mt-10 flex items-center justify-between">
               <h2 className="font-display text-2xl text-ink">Places</h2>
               <button
-                onClick={() => setAddOpen(true)}
+                onClick={handleAddPlaceClick}
                 className="inline-flex items-center gap-2 rounded-md bg-gold px-4 py-2 text-sm font-medium text-primary-foreground transition hover:bg-gold-soft"
               >
                 <Plus className="h-4 w-4" strokeWidth={2.5} />
