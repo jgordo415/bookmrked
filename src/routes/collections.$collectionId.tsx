@@ -379,7 +379,7 @@ function CollectionDetail() {
                       <div className="flex shrink-0 flex-col items-end gap-2">
                         {isVisited ? (
                           <button
-                            onClick={() => setEditVisitPlace(p)}
+                            onClick={() => setUnmarkPlace(p)}
                             className="rounded-md border border-gold/40 px-3 py-2 text-xs font-medium text-gold transition hover:bg-gold/10"
                           >
                             Visited ✓
@@ -393,6 +393,15 @@ function CollectionDetail() {
                           </button>
                         )}
                         <div className="flex items-center gap-1">
+                          {isVisited && (
+                            <button
+                              onClick={() => setEditVisitPlace(p)}
+                              aria-label="Edit visit"
+                              className="rounded-md p-1.5 text-ink-muted transition hover:bg-surface-raised hover:text-gold"
+                            >
+                              <Star className="h-3.5 w-3.5" strokeWidth={2} />
+                            </button>
+                          )}
                           <button
                             onClick={() => setEditPlace(p)}
                             aria-label="Edit place"
