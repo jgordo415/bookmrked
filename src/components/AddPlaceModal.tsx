@@ -21,28 +21,51 @@ export function AddPlaceModal({
   collectionId,
   defaultCategory,
   onCreated,
+  place,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   collectionId: string;
   defaultCategory: string | null;
   onCreated: () => void;
+  place?: {
+    id: string;
+    name: string;
+    city: string | null;
+    address?: string | null;
+    category: string | null;
+    notes: string | null;
+  } | null;
 }) {
   const initialCategory =
     defaultCategory && CATEGORIES.includes(defaultCategory) ? defaultCategory : CATEGORIES[0];
 
-  const [name, setName] = useState("");
-  const [city, setCity] = useState("");
-  const [neighborhood, setNeighborhood] = useState("");
-  const [category, setCategory] = useState(initialCategory);
-  const [notes, setNotes] = useState("");
+  const isEdit = Boolean(place);
+  const [name, setName] = useState(place?.name ?? "");
+  const [city, setCity] = useState(place?.city ?? "");
+  const [neighborhood, setNeighborhood] = useState(place?.address ?? "");
+  const [category, setCategory] = useState(
+    place?.category && CATEGORIES.includes(place.category) ? place.category : initialCategory,
+  );
+  const [notes, setNotes] = useState(place?.notes ?? "");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (open) setCategory(initialCategory);
+    if (open) {
+      setName(place?.name ?? "");
+      setCity(place?.city ?? "");
+      setNeighborhood(place?.address ?? "");
+      setCategory(
+        place?.category && CATEGORIES.includes(place.category)
+          ? place.category
+          : initialCategory,
+      );
+      setNotes(place?.notes ?? "");
+      setError(null);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, defaultCategory]);
+  }, [open, defaultCategory, place?.id]);
 
   const reset = () => {
     setName("");
@@ -59,14 +82,16 @@ export function AddPlaceModal({
     setSaving(true);
     setError(null);
     const address = neighborhood.trim() || null;
-    const { error: insertError } = await supabase.from("locations").insert({
-      collection_id: collectionId,
+    const payload = {
       name: name.trim(),
       city: city.trim(),
       address,
       category,
       notes: notes.trim() ? notes.trim().slice(0, NOTE_MAX) : null,
-    });
+    };
+    const { error: insertError } = isEdit && place
+      ? await supabase.from("locations").update(payload).eq("id", place.id)
+      : await supabase.from("locations").insert({ collection_id: collectionId, ...payload });
     setSaving(false);
     if (insertError) {
       setError(insertError.message);
@@ -83,9 +108,9 @@ export function AddPlaceModal({
     <Dialog open={open} onOpenChange={(v) => { if (!v) reset(); onOpenChange(v); }}>
       <DialogContent className="border-border bg-surface text-ink sm:max-w-md">
         <DialogHeader>
-          <div className="font-mono-tag text-gold">New place</div>
+          <div className="font-mono-tag text-gold">{isEdit ? "Edit place" : "New place"}</div>
           <DialogTitle className="font-display text-3xl text-ink">
-            Add a place
+            {isEdit ? "Edit place" : "Add a place"}
           </DialogTitle>
         </DialogHeader>
 
@@ -174,7 +199,7 @@ export function AddPlaceModal({
               disabled={saving || !name.trim() || !city.trim()}
               className="rounded-md bg-gold px-5 py-2.5 text-sm font-medium text-primary-foreground transition hover:bg-gold-soft disabled:opacity-50"
             >
-              {saving ? "Saving…" : "Add place"}
+              {saving ? "Saving…" : isEdit ? "Save changes" : "Add place"}
             </button>
           </div>
         </form>

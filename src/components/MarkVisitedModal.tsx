@@ -18,6 +18,7 @@ export function MarkVisitedModal({
   userId,
   placeName,
   onSaved,
+  initial,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
@@ -25,17 +26,19 @@ export function MarkVisitedModal({
   userId: string;
   placeName: string;
   onSaved: (data: VisitData) => void;
+  initial?: VisitData | null;
 }) {
-  const [rating, setRating] = useState(0);
+  const isEdit = Boolean(initial);
+  const [rating, setRating] = useState(initial?.star_rating ?? 0);
   const [hover, setHover] = useState(0);
-  const [note, setNote] = useState("");
+  const [note, setNote] = useState(initial?.note ?? "");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const reset = () => {
-    setRating(0);
+    setRating(initial?.star_rating ?? 0);
     setHover(0);
-    setNote("");
+    setNote(initial?.note ?? "");
     setError(null);
   };
 
@@ -47,21 +50,26 @@ export function MarkVisitedModal({
     setSaving(true);
     setError(null);
     const trimmed = note.slice(0, MAX_NOTE).trim();
-    const visited_at = new Date().toISOString();
-    const { error: err } = await supabase.from("visits").insert({
-      location_id: locationId,
-      user_id: userId,
-      star_rating: rating,
-      note: trimmed || null,
-      visited_at,
-    });
+    const visited_at = isEdit ? initial!.visited_at : new Date().toISOString();
+    const { error: err } = isEdit
+      ? await supabase
+          .from("visits")
+          .update({ star_rating: rating, note: trimmed || null })
+          .eq("location_id", locationId)
+          .eq("user_id", userId)
+      : await supabase.from("visits").insert({
+          location_id: locationId,
+          user_id: userId,
+          star_rating: rating,
+          note: trimmed || null,
+          visited_at,
+        });
     setSaving(false);
     if (err) {
       setError(err.message);
       return;
     }
     onSaved({ star_rating: rating, note: trimmed || null, visited_at });
-    reset();
     onOpenChange(false);
   };
 
@@ -76,7 +84,7 @@ export function MarkVisitedModal({
       <DialogContent className="border-border bg-surface text-ink sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="font-display text-3xl text-ink">
-            Mark visited
+            {isEdit ? "Edit visit" : "Mark visited"}
           </DialogTitle>
           <p className="font-mono-tag text-ink-muted">{placeName}</p>
         </DialogHeader>
@@ -146,7 +154,7 @@ export function MarkVisitedModal({
               disabled={saving}
               className="rounded-md bg-gold px-5 py-2 text-sm font-medium text-primary-foreground transition hover:bg-gold-soft disabled:opacity-60"
             >
-              {saving ? "Saving…" : "Save visit"}
+              {saving ? "Saving…" : isEdit ? "Save changes" : "Save visit"}
             </button>
           </div>
         </div>
