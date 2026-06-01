@@ -70,10 +70,6 @@ function Landing() {
       {/* HERO */}
       <section className="relative px-5 pt-14 pb-20 sm:px-8 sm:pt-20 md:pt-28 md:pb-32">
         <div className="mx-auto max-w-5xl">
-          <div className="flex items-center gap-2 font-mono-tag text-ink-muted">
-            <Bookmark className="h-3.5 w-3.5 text-gold" strokeWidth={2.5} />
-            <span>Early Access</span>
-          </div>
 
           <h1 className="font-display mt-6 text-[clamp(4.5rem,16vw,11rem)] font-semibold leading-[0.85] tracking-[-0.04em] text-ink">
             Bookmrked
@@ -90,10 +86,10 @@ function Landing() {
             record store, the gallery you walked past twice and finally went in.
           </p>
 
-          <EmailCapture id="hero-email" cta="Get Early Access" className="mt-10" />
+          <EmailCapture id="hero-email" cta="Start your first collection" className="mt-10" />
 
           <div className="mt-6 font-mono-tag text-ink-muted">
-            No spam. One email when we open the door.
+            Free to start. No credit card required.
           </div>
         </div>
 
@@ -299,11 +295,11 @@ function Landing() {
       {/* FOOTER CTA */}
       <section className="border-t border-border px-5 py-24 sm:px-8">
         <div className="mx-auto max-w-3xl text-center">
-          <div className="font-mono-tag text-gold">Launching soon</div>
+          <div className="font-mono-tag text-gold">Start today</div>
           <h2 className="font-display mt-4 text-4xl leading-tight text-ink sm:text-6xl">
-            Be first when we <span className="italic">open the door.</span>
+            Build your map of the world <span className="italic">worth coming back to.</span>
           </h2>
-          <EmailCapture id="footer-email" cta="Save my spot" className="mx-auto mt-10 max-w-md" />
+          <EmailCapture id="footer-email" cta="Start your first collection" className="mx-auto mt-10 max-w-md" />
         </div>
 
         <div className="mx-auto mt-24 flex max-w-5xl items-center justify-between border-t border-border pt-8 font-mono-tag text-ink-muted">
