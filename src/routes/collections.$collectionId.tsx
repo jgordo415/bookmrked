@@ -57,6 +57,12 @@ function CollectionDetail() {
   const [deletePlace, setDeletePlace] = useState<Place | null>(null);
   const [editVisitPlace, setEditVisitPlace] = useState<Place | null>(null);
   const [copied, setCopied] = useState(false);
+  const [unmarkPlace, setUnmarkPlace] = useState<Place | null>(null);
+  const [editCollectionOpen, setEditCollectionOpen] = useState(false);
+  const [editTitle, setEditTitle] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [savingCollection, setSavingCollection] = useState(false);
+  const [deleteCollectionOpen, setDeleteCollectionOpen] = useState(false);
 
   const loadPlaces = useCallback(
     async (uid: string) => {
