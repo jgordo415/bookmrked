@@ -116,6 +116,46 @@ function CollectionDetail() {
     await loadPlaces(userId);
   };
 
+  const handleUnmarkVisit = async () => {
+    if (!unmarkPlace || !userId) return;
+    await supabase.from("visits").delete().eq("location_id", unmarkPlace.id).eq("user_id", userId);
+    setVisits((prev) => {
+      const next = { ...prev };
+      delete next[unmarkPlace.id];
+      return next;
+    });
+    setUnmarkPlace(null);
+  };
+
+  const handleUpdateCollection = async () => {
+    if (!collection || !userId) return;
+    const title = editTitle.trim();
+    if (!title) return;
+    setSavingCollection(true);
+    const { error: err } = await supabase
+      .from("collections")
+      .update({ title, description: editDescription.trim() || null })
+      .eq("id", collection.id)
+      .eq("user_id", userId);
+    setSavingCollection(false);
+    if (err) return;
+    setCollection((prev) => prev ? { ...prev, title, description: editDescription.trim() || null } : prev);
+    setEditCollectionOpen(false);
+  };
+
+  const handleDeleteCollection = async () => {
+    if (!collection || !userId) return;
+    const { data: locs } = await supabase.from("locations").select("id").eq("collection_id", collectionId);
+    const locIds = (locs ?? []).map((l) => l.id);
+    if (locIds.length > 0) {
+      await supabase.from("visits").delete().in("location_id", locIds).eq("user_id", userId);
+      await supabase.from("locations").delete().in("id", locIds);
+    }
+    await supabase.from("collections").delete().eq("id", collectionId);
+    setDeleteCollectionOpen(false);
+    navigate({ to: "/dashboard" });
+  };
+
   useEffect(() => {
     let active = true;
     (async () => {
