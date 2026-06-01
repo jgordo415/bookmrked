@@ -26,6 +26,7 @@ function Dashboard() {
   const [collections, setCollections] = useState<CollectionCard[]>([]);
   const [collectionsLoading, setCollectionsLoading] = useState(true);
   const [createOpen, setCreateOpen] = useState(false);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
 
   useEffect(() => {
     let active = true;
