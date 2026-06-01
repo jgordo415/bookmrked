@@ -70,10 +70,6 @@ function Landing() {
       {/* HERO */}
       <section className="relative px-5 pt-14 pb-20 sm:px-8 sm:pt-20 md:pt-28 md:pb-32">
         <div className="mx-auto max-w-5xl">
-          <div className="flex items-center gap-2 font-mono-tag text-ink-muted">
-            <Bookmark className="h-3.5 w-3.5 text-gold" strokeWidth={2.5} />
-            <span>Early Access</span>
-          </div>
 
           <h1 className="font-display mt-6 text-[clamp(4.5rem,16vw,11rem)] font-semibold leading-[0.85] tracking-[-0.04em] text-ink">
             Bookmrked
