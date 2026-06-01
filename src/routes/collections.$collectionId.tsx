@@ -209,7 +209,7 @@ function CollectionDetail() {
 
   const handleShare = async () => {
     if (!collection.share_token) return;
-    const url = `https://bookmrked.lovable.app/c/${collection.share_token}`;
+    const url = `https://bookmrked.com/c/${collection.share_token}`;
     try {
       if (navigator.share) {
         await navigator.share({ title: collection.title, url });
