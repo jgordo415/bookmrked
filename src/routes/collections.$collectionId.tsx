@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Plus, MapPin, Check, Star } from "lucide-react";
+import { ArrowLeft, Plus, MapPin, Check, Star, Share2 } from "lucide-react";
 import { AddPlaceModal } from "@/components/AddPlaceModal";
 import { MarkVisitedModal, type VisitData } from "@/components/MarkVisitedModal";
 import { UpgradeModal } from "@/components/UpgradeModal";
@@ -17,6 +17,7 @@ type Collection = {
   description: string | null;
   category: string | null;
   privacy: string;
+  share_token: string | null;
 };
 
 type Place = {
@@ -39,6 +40,7 @@ function CollectionDetail() {
   const [addOpen, setAddOpen] = useState(false);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [markPlace, setMarkPlace] = useState<Place | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const loadPlaces = useCallback(
     async (uid: string) => {
@@ -95,7 +97,7 @@ function CollectionDetail() {
       setUserId(user.id);
       const { data } = await supabase
         .from("collections")
-        .select("id, title, description, category, privacy")
+        .select("id, title, description, category, privacy, share_token")
         .eq("id", collectionId)
         .maybeSingle();
       if (!active) return;
@@ -134,16 +136,41 @@ function CollectionDetail() {
   const visited = places.reduce((acc, p) => acc + (visits[p.id] ? 1 : 0), 0);
   const pct = total === 0 ? 0 : Math.round((visited / total) * 100);
 
+  const handleShare = async () => {
+    if (!collection.share_token) return;
+    const url = `https://bookmrked.lovable.app/c/${collection.share_token}`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: collection.title, url });
+      } else {
+        await navigator.clipboard.writeText(url);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
+    } catch {
+      // user cancelled share
+    }
+  };
+
   return (
     <main className="min-h-screen bg-background px-5 pb-28 pt-10 sm:px-8">
       <div className="mx-auto max-w-3xl">
-        <Link
-          to="/dashboard"
-          className="inline-flex items-center gap-2 font-mono-tag text-ink-muted hover:text-gold"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" strokeWidth={2.5} />
-          Dashboard
-        </Link>
+        <div className="flex items-center justify-between">
+          <Link
+            to="/dashboard"
+            className="inline-flex items-center gap-2 font-mono-tag text-ink-muted hover:text-gold"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" strokeWidth={2.5} />
+            Dashboard
+          </Link>
+          <button
+            onClick={handleShare}
+            className="inline-flex items-center gap-2 rounded-md border border-gold/40 px-3 py-1.5 font-mono-tag text-xs text-gold transition hover:bg-gold hover:text-primary-foreground"
+          >
+            <Share2 className="h-3.5 w-3.5" strokeWidth={2.5} />
+            {copied ? "Link copied" : "Share"}
+          </button>
+        </div>
 
         <div className="mt-12">
           {collection.category && (
