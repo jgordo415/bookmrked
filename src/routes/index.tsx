@@ -89,7 +89,7 @@ function Landing() {
           <EmailCapture id="hero-email" cta="Start your first collection" className="mt-10" />
 
           <div className="mt-6 font-mono-tag text-ink-muted">
-            No spam. One email when we open the door.
+            Free to start. No credit card required.
           </div>
         </div>
 
