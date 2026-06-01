@@ -228,27 +228,42 @@ function Dashboard() {
         ) : (
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {collections.map((c) => (
-              <Link
+              <div
                 key={c.id}
-                to="/collections/$collectionId"
-                params={{ collectionId: c.id }}
-                className="group block rounded-xl border border-border bg-surface p-6 transition hover:border-gold/60 hover:bg-surface-raised"
+                className="group relative rounded-xl border border-border bg-surface p-6 transition hover:border-gold/60 hover:bg-surface-raised"
               >
-                {c.category && (
-                  <div className="font-mono-tag text-gold">{c.category}</div>
-                )}
-                <h3 className="font-display mt-3 text-2xl text-ink">{c.title}</h3>
-                <div className="mt-5 flex items-center justify-between text-sm text-ink-muted">
-                  <span>{c.locationCount} {c.locationCount === 1 ? "place" : "places"}</span>
-                  <span className="font-mono-tag text-gold">{c.completion}%</span>
-                </div>
-                <div className="mt-3 h-1 w-full overflow-hidden rounded-full bg-background">
-                  <div
-                    className="h-full bg-gold transition-all"
-                    style={{ width: `${c.completion}%` }}
-                  />
-                </div>
-              </Link>
+                <Link
+                  to="/collections/$collectionId"
+                  params={{ collectionId: c.id }}
+                  className="block"
+                >
+                  {c.category && (
+                    <div className="font-mono-tag text-gold">{c.category}</div>
+                  )}
+                  <h3 className="font-display mt-3 text-2xl text-ink">{c.title}</h3>
+                  <div className="mt-5 flex items-center justify-between text-sm text-ink-muted">
+                    <span>{c.locationCount} {c.locationCount === 1 ? "place" : "places"}</span>
+                    <span className="font-mono-tag text-gold">{c.completion}%</span>
+                  </div>
+                  <div className="mt-3 h-1 w-full overflow-hidden rounded-full bg-background">
+                    <div
+                      className="h-full bg-gold transition-all"
+                      style={{ width: `${c.completion}%` }}
+                    />
+                  </div>
+                </Link>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDeleteCollectionId(c.id);
+                    setDeleteCollectionTitle(c.title);
+                  }}
+                  aria-label="Delete collection"
+                  className="absolute right-3 top-3 rounded-md p-1.5 text-ink-muted opacity-0 transition hover:bg-surface-raised hover:text-destructive group-hover:opacity-100"
+                >
+                  <Trash2 className="h-3.5 w-3.5" strokeWidth={2} />
+                </button>
+              </div>
             ))}
           </div>
         )}
