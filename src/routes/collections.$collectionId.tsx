@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Plus, MapPin, Check, Star } from "lucide-react";
 import { AddPlaceModal } from "@/components/AddPlaceModal";
 import { MarkVisitedModal, type VisitData } from "@/components/MarkVisitedModal";
+import { UpgradeModal } from "@/components/UpgradeModal";
+import { BottomNav } from "@/components/BottomNav";
 
 export const Route = createFileRoute("/collections/$collectionId")({
   component: CollectionDetail,
@@ -35,6 +37,7 @@ function CollectionDetail() {
   const [places, setPlaces] = useState<Place[]>([]);
   const [visits, setVisits] = useState<Record<string, VisitData>>({});
   const [addOpen, setAddOpen] = useState(false);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [markPlace, setMarkPlace] = useState<Place | null>(null);
 
   const loadPlaces = useCallback(
@@ -71,6 +74,14 @@ function CollectionDetail() {
     },
     [collectionId],
   );
+
+  const handleAddPlaceClick = () => {
+    if (places.length >= 15) {
+      setUpgradeOpen(true);
+    } else {
+      setAddOpen(true);
+    }
+  };
 
   useEffect(() => {
     let active = true;
@@ -174,7 +185,7 @@ function CollectionDetail() {
               Start filling this collection with spots worth remembering.
             </p>
             <button
-              onClick={() => setAddOpen(true)}
+              onClick={handleAddPlaceClick}
               className="mt-8 inline-flex items-center gap-2 rounded-md bg-gold px-6 py-3 text-sm font-medium text-primary-foreground transition hover:bg-gold-soft"
             >
               <Plus className="h-4 w-4" strokeWidth={2.5} />
@@ -186,7 +197,7 @@ function CollectionDetail() {
             <div className="mt-10 flex items-center justify-between">
               <h2 className="font-display text-2xl text-ink">Places</h2>
               <button
-                onClick={() => setAddOpen(true)}
+                onClick={handleAddPlaceClick}
                 className="inline-flex items-center gap-2 rounded-md bg-gold px-4 py-2 text-sm font-medium text-primary-foreground transition hover:bg-gold-soft"
               >
                 <Plus className="h-4 w-4" strokeWidth={2.5} />
@@ -293,6 +304,13 @@ function CollectionDetail() {
             }}
           />
         )}
+        <BottomNav />
+
+        <UpgradeModal
+          open={upgradeOpen}
+          onOpenChange={setUpgradeOpen}
+          type="places"
+        />
       </div>
     </main>
   );

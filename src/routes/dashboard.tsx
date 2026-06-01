@@ -2,8 +2,10 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
-import { Bookmark, Plus, Home, Compass, User as UserIcon, Lock } from "lucide-react";
+import { Bookmark, Plus } from "lucide-react";
 import { CreateCollectionModal } from "@/components/CreateCollectionModal";
+import { UpgradeModal } from "@/components/UpgradeModal";
+import { BottomNav } from "@/components/BottomNav";
 
 export const Route = createFileRoute("/dashboard")({
   component: Dashboard,
@@ -24,6 +26,7 @@ function Dashboard() {
   const [collections, setCollections] = useState<CollectionCard[]>([]);
   const [collectionsLoading, setCollectionsLoading] = useState(true);
   const [createOpen, setCreateOpen] = useState(false);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -93,6 +96,14 @@ function Dashboard() {
     };
   }, [user]);
 
+  const handleCreateClick = () => {
+    if (collections.length >= 5) {
+      setUpgradeOpen(true);
+    } else {
+      setCreateOpen(true);
+    }
+  };
+
   if (loading) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-background">
@@ -128,7 +139,7 @@ function Dashboard() {
           </div>
           {collections.length > 0 && (
             <button
-              onClick={() => setCreateOpen(true)}
+              onClick={handleCreateClick}
               className="inline-flex items-center gap-2 rounded-md bg-gold px-5 py-3 text-sm font-medium text-primary-foreground transition hover:bg-gold-soft"
             >
               <Plus className="h-4 w-4" strokeWidth={2.5} />
@@ -150,7 +161,7 @@ function Dashboard() {
               you'll keep coming back to.
             </p>
             <button
-              onClick={() => setCreateOpen(true)}
+              onClick={handleCreateClick}
               className="mt-8 inline-flex items-center gap-2 rounded-md bg-gold px-6 py-3 text-sm font-medium text-primary-foreground transition hover:bg-gold-soft"
             >
               <Plus className="h-4 w-4" strokeWidth={2.5} />
@@ -186,13 +197,13 @@ function Dashboard() {
         )}
       </div>
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/90 backdrop-blur">
-        <div className="mx-auto flex max-w-md items-stretch justify-around px-2 py-2">
-          <NavItem icon={<Home className="h-5 w-5" />} label="Home" active />
-          <NavItem icon={<Compass className="h-5 w-5" />} label="Discover" locked />
-          <NavItem icon={<UserIcon className="h-5 w-5" />} label="Profile" />
-        </div>
-      </nav>
+      <BottomNav />
+
+      <UpgradeModal
+        open={upgradeOpen}
+        onOpenChange={setUpgradeOpen}
+        type="collections"
+      />
 
       <CreateCollectionModal
         open={createOpen}
@@ -200,38 +211,5 @@ function Dashboard() {
         userId={user.id}
       />
     </main>
-  );
-}
-
-function NavItem({
-  icon,
-  label,
-  active,
-  locked,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  active?: boolean;
-  locked?: boolean;
-}) {
-  return (
-    <button
-      disabled={locked}
-      className={`flex flex-1 flex-col items-center gap-1 rounded-md px-4 py-2 font-mono-tag transition ${
-        active
-          ? "text-gold"
-          : locked
-            ? "text-ink-muted/40"
-            : "text-ink-muted hover:text-ink"
-      }`}
-    >
-      <div className="relative">
-        {icon}
-        {locked && (
-          <Lock className="absolute -right-2 -top-1 h-3 w-3" strokeWidth={2.5} />
-        )}
-      </div>
-      {label}
-    </button>
   );
 }
