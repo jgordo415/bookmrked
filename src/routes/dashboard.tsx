@@ -140,7 +140,7 @@ function Dashboard() {
           </div>
           {collections.length > 0 && (
             <button
-              onClick={() => setCreateOpen(true)}
+              onClick={handleCreateClick}
               className="inline-flex items-center gap-2 rounded-md bg-gold px-5 py-3 text-sm font-medium text-primary-foreground transition hover:bg-gold-soft"
             >
               <Plus className="h-4 w-4" strokeWidth={2.5} />
