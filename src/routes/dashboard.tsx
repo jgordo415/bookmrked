@@ -37,6 +37,10 @@ function Dashboard() {
   const [collectionsLoading, setCollectionsLoading] = useState(true);
   const [createOpen, setCreateOpen] = useState(false);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [deleteCollectionId, setDeleteCollectionId] = useState<string | null>(null);
+  const [deleteCollectionTitle, setDeleteCollectionTitle] = useState("");
+
+  const loadCollections = async () => {
 
   useEffect(() => {
     let active = true;
