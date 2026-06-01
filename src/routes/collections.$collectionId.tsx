@@ -1,11 +1,21 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Plus, MapPin, Check, Star, Share2 } from "lucide-react";
+import { ArrowLeft, Plus, MapPin, Check, Star, Share2, Pencil, Trash2 } from "lucide-react";
 import { AddPlaceModal } from "@/components/AddPlaceModal";
 import { MarkVisitedModal, type VisitData } from "@/components/MarkVisitedModal";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { BottomNav } from "@/components/BottomNav";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/collections/$collectionId")({
   component: CollectionDetail,
@@ -24,6 +34,7 @@ type Place = {
   id: string;
   name: string;
   city: string | null;
+  address: string | null;
   category: string | null;
   notes: string | null;
 };
@@ -40,13 +51,16 @@ function CollectionDetail() {
   const [addOpen, setAddOpen] = useState(false);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [markPlace, setMarkPlace] = useState<Place | null>(null);
+  const [editPlace, setEditPlace] = useState<Place | null>(null);
+  const [deletePlace, setDeletePlace] = useState<Place | null>(null);
+  const [editVisitPlace, setEditVisitPlace] = useState<Place | null>(null);
   const [copied, setCopied] = useState(false);
 
   const loadPlaces = useCallback(
     async (uid: string) => {
       const { data: locs } = await supabase
         .from("locations")
-        .select("id, name, city, category, notes")
+        .select("id, name, city, address, category, notes")
         .eq("collection_id", collectionId)
         .order("created_at", { ascending: false });
       const list = (locs ?? []) as Place[];
@@ -83,6 +97,15 @@ function CollectionDetail() {
     } else {
       setAddOpen(true);
     }
+  };
+
+  const handleDeletePlace = async () => {
+    if (!deletePlace || !userId) return;
+    const id = deletePlace.id;
+    await supabase.from("visits").delete().eq("location_id", id).eq("user_id", userId);
+    await supabase.from("locations").delete().eq("id", id);
+    setDeletePlace(null);
+    await loadPlaces(userId);
   };
 
   useEffect(() => {
@@ -287,17 +310,39 @@ function CollectionDetail() {
                           </p>
                         )}
                       </div>
-                      <button
-                        onClick={() => !isVisited && setMarkPlace(p)}
-                        disabled={isVisited}
-                        className={`shrink-0 rounded-md px-3 py-2 text-xs font-medium transition ${
-                          isVisited
-                            ? "border border-gold/40 text-gold"
-                            : "bg-gold text-primary-foreground hover:bg-gold-soft"
-                        } disabled:cursor-default disabled:opacity-100`}
-                      >
-                        {isVisited ? "Visited ✓" : "Mark Visited"}
-                      </button>
+                      <div className="flex shrink-0 flex-col items-end gap-2">
+                        {isVisited ? (
+                          <button
+                            onClick={() => setEditVisitPlace(p)}
+                            className="rounded-md border border-gold/40 px-3 py-2 text-xs font-medium text-gold transition hover:bg-gold/10"
+                          >
+                            Visited ✓
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => setMarkPlace(p)}
+                            className="rounded-md bg-gold px-3 py-2 text-xs font-medium text-primary-foreground transition hover:bg-gold-soft"
+                          >
+                            Mark Visited
+                          </button>
+                        )}
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => setEditPlace(p)}
+                            aria-label="Edit place"
+                            className="rounded-md p-1.5 text-ink-muted transition hover:bg-surface-raised hover:text-gold"
+                          >
+                            <Pencil className="h-3.5 w-3.5" strokeWidth={2} />
+                          </button>
+                          <button
+                            onClick={() => setDeletePlace(p)}
+                            aria-label="Delete place"
+                            className="rounded-md p-1.5 text-ink-muted transition hover:bg-surface-raised hover:text-destructive"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" strokeWidth={2} />
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </li>
                 );
@@ -316,6 +361,17 @@ function CollectionDetail() {
           />
         )}
 
+        {userId && editPlace && (
+          <AddPlaceModal
+            open={Boolean(editPlace)}
+            onOpenChange={(v) => { if (!v) setEditPlace(null); }}
+            collectionId={collection.id}
+            defaultCategory={collection.category}
+            place={editPlace}
+            onCreated={() => { setEditPlace(null); loadPlaces(userId); }}
+          />
+        )}
+
         {userId && markPlace && (
           <MarkVisitedModal
             open={Boolean(markPlace)}
@@ -331,6 +387,22 @@ function CollectionDetail() {
             }}
           />
         )}
+
+        {userId && editVisitPlace && (
+          <MarkVisitedModal
+            open={Boolean(editVisitPlace)}
+            onOpenChange={(v) => { if (!v) setEditVisitPlace(null); }}
+            locationId={editVisitPlace.id}
+            userId={userId}
+            placeName={editVisitPlace.name}
+            initial={visits[editVisitPlace.id] ?? null}
+            onSaved={(data) => {
+              setVisits((prev) => ({ ...prev, [editVisitPlace.id]: data }));
+              setEditVisitPlace(null);
+            }}
+          />
+        )}
+
         <BottomNav />
 
         <UpgradeModal
@@ -338,6 +410,30 @@ function CollectionDetail() {
           onOpenChange={setUpgradeOpen}
           type="places"
         />
+
+        <AlertDialog open={Boolean(deletePlace)} onOpenChange={(v) => { if (!v) setDeletePlace(null); }}>
+          <AlertDialogContent className="border-border bg-surface text-ink">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="font-display text-2xl text-ink">
+                Delete this place?
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-ink-muted">
+                {deletePlace ? `"${deletePlace.name}" will be removed from this collection along with your visit record. This can't be undone.` : ""}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel className="border-border bg-transparent text-ink hover:bg-surface-raised">
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDeletePlace}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </main>
   );
