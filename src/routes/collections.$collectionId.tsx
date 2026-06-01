@@ -247,9 +247,27 @@ function CollectionDetail() {
           {collection.category && (
             <div className="font-mono-tag text-gold">{collection.category}</div>
           )}
-          <h1 className="font-display mt-3 text-5xl text-ink sm:text-6xl">
-            {collection.title}
-          </h1>
+          <div className="flex items-start justify-between gap-4">
+            <h1 className="font-display mt-3 text-5xl text-ink sm:text-6xl">
+              {collection.title}
+            </h1>
+            <div className="mt-3 flex items-center gap-1">
+              <button
+                onClick={() => { setEditTitle(collection.title); setEditDescription(collection.description ?? ""); setEditCollectionOpen(true); }}
+                aria-label="Edit collection"
+                className="rounded-md p-2 text-ink-muted transition hover:bg-surface-raised hover:text-gold"
+              >
+                <Pencil className="h-4 w-4" strokeWidth={2} />
+              </button>
+              <button
+                onClick={() => setDeleteCollectionOpen(true)}
+                aria-label="Delete collection"
+                className="rounded-md p-2 text-ink-muted transition hover:bg-surface-raised hover:text-destructive"
+              >
+                <Trash2 className="h-4 w-4" strokeWidth={2} />
+              </button>
+            </div>
+          </div>
           {collection.description && (
             <p className="mt-4 max-w-xl text-ink-muted">{collection.description}</p>
           )}
