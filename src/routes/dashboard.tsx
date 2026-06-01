@@ -103,7 +103,6 @@ function Dashboard() {
       setCreateOpen(true);
     }
   };
-  };
 
   if (loading) {
     return (
