@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
+import { appUrl } from "@/lib/app-url";
 
 export function AuthModal({
   open,
@@ -36,7 +37,7 @@ export function AuthModal({
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: `${window.location.origin}/dashboard`,
+        emailRedirectTo: appUrl("/dashboard"),
       },
     });
     if (error) {
@@ -50,7 +51,7 @@ export function AuthModal({
   const signInWithGoogle = async () => {
     setErrorMsg("");
     const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: `${window.location.origin}/dashboard`,
+      redirect_uri: appUrl("/dashboard"),
     });
     if (result.error) {
       setErrorMsg(result.error.message ?? "Google sign-in failed");
