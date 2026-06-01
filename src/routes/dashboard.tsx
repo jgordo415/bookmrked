@@ -96,7 +96,13 @@ function Dashboard() {
     };
   }, [user]);
 
-  if (loading) {
+  const handleCreateClick = () => {
+    if (collections.length >= 5) {
+      setUpgradeOpen(true);
+    } else {
+      setCreateOpen(true);
+    }
+  };
     return (
       <main className="flex min-h-screen items-center justify-center bg-background">
         <div className="font-mono-tag text-ink-muted">Signing you in…</div>
