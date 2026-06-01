@@ -1,7 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { Check, Star, MapPin, Bookmark } from "lucide-react";
 import { AuthModal } from "@/components/AuthModal";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -64,9 +65,44 @@ function Landing() {
   const [visited, setVisited] = useState<Record<string, boolean>>({});
   const visitedCount = Object.values(visited).filter(Boolean).length;
   const progress = Math.round((visitedCount / SPOTS.length) * 100);
+  const navigate = useNavigate();
+  const [signInOpen, setSignInOpen] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    supabase.auth.getSession().then(({ data }) => {
+      if (active && data.session) {
+        navigate({ to: "/dashboard", replace: true });
+      }
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      if (session) navigate({ to: "/dashboard", replace: true });
+    });
+    return () => {
+      active = false;
+      sub.subscription.unsubscribe();
+    };
+  }, [navigate]);
 
   return (
     <main className="min-h-screen overflow-x-hidden">
+      {/* TOP NAV */}
+      <nav className="absolute left-0 right-0 top-0 z-10 px-5 pt-6 sm:px-8 sm:pt-8">
+        <div className="mx-auto flex max-w-5xl items-center justify-between">
+          <div className="flex items-center gap-2 font-mono-tag text-ink-muted">
+            <Bookmark className="h-3.5 w-3.5 text-gold" strokeWidth={2.5} />
+            bookmrked
+          </div>
+          <button
+            type="button"
+            onClick={() => setSignInOpen(true)}
+            className="font-mono-tag text-ink-muted transition-colors hover:text-gold"
+          >
+            Sign in
+          </button>
+        </div>
+      </nav>
+
       {/* HERO */}
       <section className="relative px-5 pt-14 pb-20 sm:px-8 sm:pt-20 md:pt-28 md:pb-32">
         <div className="mx-auto max-w-5xl">
@@ -310,6 +346,13 @@ function Landing() {
           <div>© {new Date().getFullYear()} Bookmrked</div>
         </div>
       </section>
+
+      <AuthModal
+        open={signInOpen}
+        onOpenChange={setSignInOpen}
+        title="Welcome back"
+        description="We'll email you a magic link to sign in."
+      />
     </main>
   );
 }
