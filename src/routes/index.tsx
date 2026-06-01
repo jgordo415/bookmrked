@@ -295,11 +295,11 @@ function Landing() {
       {/* FOOTER CTA */}
       <section className="border-t border-border px-5 py-24 sm:px-8">
         <div className="mx-auto max-w-3xl text-center">
-          <div className="font-mono-tag text-gold">Launching soon</div>
+          <div className="font-mono-tag text-gold">Start today</div>
           <h2 className="font-display mt-4 text-4xl leading-tight text-ink sm:text-6xl">
-            Be first when we <span className="italic">open the door.</span>
+            Build your map of the world <span className="italic">worth coming back to.</span>
           </h2>
-          <EmailCapture id="footer-email" cta="Save my spot" className="mx-auto mt-10 max-w-md" />
+          <EmailCapture id="footer-email" cta="Start your first collection" className="mx-auto mt-10 max-w-md" />
         </div>
 
         <div className="mx-auto mt-24 flex max-w-5xl items-center justify-between border-t border-border pt-8 font-mono-tag text-ink-muted">
