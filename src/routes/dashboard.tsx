@@ -282,6 +282,30 @@ function Dashboard() {
         onOpenChange={setCreateOpen}
         userId={user.id}
       />
+
+      <AlertDialog open={Boolean(deleteCollectionId)} onOpenChange={(v) => { if (!v) { setDeleteCollectionId(null); setDeleteCollectionTitle(""); } }}>
+        <AlertDialogContent className="border-border bg-surface text-ink">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display text-2xl text-ink">
+              Delete this collection?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-ink-muted">
+              {deleteCollectionTitle ? `"${deleteCollectionTitle}" and all its places will be removed. This cannot be undone.` : ""}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="border-border bg-transparent text-ink hover:bg-surface-raised">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteCollection}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </main>
   );
 }
