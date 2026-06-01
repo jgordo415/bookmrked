@@ -103,6 +103,9 @@ function Dashboard() {
       setCreateOpen(true);
     }
   };
+  };
+
+  if (loading) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-background">
         <div className="font-mono-tag text-ink-muted">Signing you in…</div>
