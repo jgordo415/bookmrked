@@ -304,6 +304,13 @@ function CollectionDetail() {
             }}
           />
         )}
+        <BottomNav />
+
+        <UpgradeModal
+          open={upgradeOpen}
+          onOpenChange={setUpgradeOpen}
+          type="places"
+        />
       </div>
     </main>
   );
