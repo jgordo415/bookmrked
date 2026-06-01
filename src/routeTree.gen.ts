@@ -13,6 +13,7 @@ import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CollectionsCollectionIdRouteImport } from './routes/collections.$collectionId'
+import { Route as CShareTokenRouteImport } from './routes/c.$shareToken'
 
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
@@ -34,17 +35,24 @@ const CollectionsCollectionIdRoute = CollectionsCollectionIdRouteImport.update({
   path: '/collections/$collectionId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CShareTokenRoute = CShareTokenRouteImport.update({
+  id: '/c/$shareToken',
+  path: '/c/$shareToken',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
   '/profile': typeof ProfileRoute
+  '/c/$shareToken': typeof CShareTokenRoute
   '/collections/$collectionId': typeof CollectionsCollectionIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
   '/profile': typeof ProfileRoute
+  '/c/$shareToken': typeof CShareTokenRoute
   '/collections/$collectionId': typeof CollectionsCollectionIdRoute
 }
 export interface FileRoutesById {
@@ -52,18 +60,30 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
   '/profile': typeof ProfileRoute
+  '/c/$shareToken': typeof CShareTokenRoute
   '/collections/$collectionId': typeof CollectionsCollectionIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/profile' | '/collections/$collectionId'
+  fullPaths:
+    | '/'
+    | '/dashboard'
+    | '/profile'
+    | '/c/$shareToken'
+    | '/collections/$collectionId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/profile' | '/collections/$collectionId'
+  to:
+    | '/'
+    | '/dashboard'
+    | '/profile'
+    | '/c/$shareToken'
+    | '/collections/$collectionId'
   id:
     | '__root__'
     | '/'
     | '/dashboard'
     | '/profile'
+    | '/c/$shareToken'
     | '/collections/$collectionId'
   fileRoutesById: FileRoutesById
 }
@@ -71,6 +91,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRoute: typeof DashboardRoute
   ProfileRoute: typeof ProfileRoute
+  CShareTokenRoute: typeof CShareTokenRoute
   CollectionsCollectionIdRoute: typeof CollectionsCollectionIdRoute
 }
 
@@ -104,6 +125,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CollectionsCollectionIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/c/$shareToken': {
+      id: '/c/$shareToken'
+      path: '/c/$shareToken'
+      fullPath: '/c/$shareToken'
+      preLoaderRoute: typeof CShareTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -111,8 +139,18 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRoute: DashboardRoute,
   ProfileRoute: ProfileRoute,
+  CShareTokenRoute: CShareTokenRoute,
   CollectionsCollectionIdRoute: CollectionsCollectionIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
