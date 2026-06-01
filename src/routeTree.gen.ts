@@ -14,7 +14,6 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CollectionsCollectionIdRouteImport } from './routes/collections.$collectionId'
 import { Route as CShareTokenRouteImport } from './routes/c.$shareToken'
-import { Route as CShareTokenRouteImport } from './routes/c.$shareToken'
 
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
@@ -34,11 +33,6 @@ const IndexRoute = IndexRouteImport.update({
 const CollectionsCollectionIdRoute = CollectionsCollectionIdRouteImport.update({
   id: '/collections/$collectionId',
   path: '/collections/$collectionId',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CShareTokenRoute = CShareTokenRouteImport.update({
-  id: '/c/$shareToken',
-  path: '/c/$shareToken',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CShareTokenRoute = CShareTokenRouteImport.update({
