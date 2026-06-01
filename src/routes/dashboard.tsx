@@ -2,10 +2,20 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
-import { Bookmark, Plus } from "lucide-react";
+import { Bookmark, Plus, Trash2 } from "lucide-react";
 import { CreateCollectionModal } from "@/components/CreateCollectionModal";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { BottomNav } from "@/components/BottomNav";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/dashboard")({
   component: Dashboard,
