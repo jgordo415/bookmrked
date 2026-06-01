@@ -509,6 +509,103 @@ function CollectionDetail() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        {/* Unmark visit */}
+        <AlertDialog open={Boolean(unmarkPlace)} onOpenChange={(v) => { if (!v) setUnmarkPlace(null); }}>
+          <AlertDialogContent className="border-border bg-surface text-ink">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="font-display text-2xl text-ink">
+                Mark as not visited?
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-ink-muted">
+                {unmarkPlace ? `"${unmarkPlace.name}" will be marked as unvisited and your rating and notes will be removed.` : ""}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel className="border-border bg-transparent text-ink hover:bg-surface-raised">
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleUnmarkVisit}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Unmark
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Edit collection */}
+        <Dialog open={editCollectionOpen} onOpenChange={(v) => { if (!v) setEditCollectionOpen(false); }}>
+          <DialogContent className="border-border bg-surface text-ink sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="font-display text-3xl text-ink">Edit collection</DialogTitle>
+            </DialogHeader>
+            <div className="mt-2 space-y-4">
+              <div>
+                <label className="font-mono-tag text-ink-muted">Name</label>
+                <Input
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  placeholder="Collection name"
+                  className="mt-2 border-border bg-background text-ink placeholder:text-ink-muted/60"
+                />
+              </div>
+              <div>
+                <label className="font-mono-tag text-ink-muted">Description</label>
+                <textarea
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
+                  rows={3}
+                  placeholder="Optional description"
+                  className="mt-2 w-full resize-none rounded-md border border-border bg-background px-3 py-2 text-sm text-ink placeholder:text-ink-muted/60 focus:border-gold focus:outline-none"
+                />
+              </div>
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setEditCollectionOpen(false)}
+                  className="font-mono-tag text-ink-muted hover:text-ink"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleUpdateCollection}
+                  disabled={savingCollection || !editTitle.trim()}
+                  className="rounded-md bg-gold px-5 py-2 text-sm font-medium text-primary-foreground transition hover:bg-gold-soft disabled:opacity-60"
+                >
+                  {savingCollection ? "Saving…" : "Save changes"}
+                </button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete collection */}
+        <AlertDialog open={deleteCollectionOpen} onOpenChange={(v) => { if (!v) setDeleteCollectionOpen(false); }}>
+          <AlertDialogContent className="border-border bg-surface text-ink">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="font-display text-2xl text-ink">
+                Delete this collection?
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-ink-muted">
+                {collection ? `"${collection.title}" and all its places will be removed. This cannot be undone.` : ""}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel className="border-border bg-transparent text-ink hover:bg-surface-raised">
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDeleteCollection}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </main>
   );
