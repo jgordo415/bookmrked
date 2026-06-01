@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Plus, MapPin, Check, Star } from "lucide-react";
 import { AddPlaceModal } from "@/components/AddPlaceModal";
 import { MarkVisitedModal, type VisitData } from "@/components/MarkVisitedModal";
+import { UpgradeModal } from "@/components/UpgradeModal";
+import { BottomNav } from "@/components/BottomNav";
 
 export const Route = createFileRoute("/collections/$collectionId")({
   component: CollectionDetail,
