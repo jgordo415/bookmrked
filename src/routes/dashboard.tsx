@@ -2,10 +2,20 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
-import { Bookmark, Plus } from "lucide-react";
+import { Bookmark, Plus, Trash2 } from "lucide-react";
 import { CreateCollectionModal } from "@/components/CreateCollectionModal";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { BottomNav } from "@/components/BottomNav";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/dashboard")({
   component: Dashboard,
@@ -27,6 +37,53 @@ function Dashboard() {
   const [collectionsLoading, setCollectionsLoading] = useState(true);
   const [createOpen, setCreateOpen] = useState(false);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [deleteCollectionId, setDeleteCollectionId] = useState<string | null>(null);
+  const [deleteCollectionTitle, setDeleteCollectionTitle] = useState("");
+
+  const handleDeleteCollection = async () => {
+    if (!deleteCollectionId || !user) return;
+    const { data: locs } = await supabase.from("locations").select("id").eq("collection_id", deleteCollectionId);
+    const locIds = (locs ?? []).map((l) => l.id);
+    if (locIds.length > 0) {
+      await supabase.from("visits").delete().in("location_id", locIds).eq("user_id", user.id);
+      await supabase.from("locations").delete().in("id", locIds);
+    }
+    await supabase.from("collections").delete().eq("id", deleteCollectionId);
+    setDeleteCollectionId(null);
+    setDeleteCollectionTitle("");
+    // reload collections
+    const { data: cols } = await supabase
+      .from("collections")
+      .select("id, title, category")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
+    if (!cols) {
+      setCollections([]);
+      return;
+    }
+    const ids = cols.map((c) => c.id);
+    const { data: newLocs } = ids.length
+      ? await supabase.from("locations").select("id, collection_id").in("collection_id", ids)
+      : { data: [] as { id: string; collection_id: string }[] };
+    const newLocIds = (newLocs ?? []).map((l) => l.id);
+    const { data: visits } = newLocIds.length
+      ? await supabase.from("visits").select("location_id").eq("user_id", user.id).in("location_id", newLocIds)
+      : { data: [] as { location_id: string }[] };
+    const visitedSet = new Set((visits ?? []).map((v) => v.location_id));
+    const cards: CollectionCard[] = cols.map((c) => {
+      const colLocs = (newLocs ?? []).filter((l) => l.collection_id === c.id);
+      const visited = colLocs.filter((l) => visitedSet.has(l.id)).length;
+      const completion = colLocs.length === 0 ? 0 : Math.round((visited / colLocs.length) * 100);
+      return {
+        id: c.id,
+        title: c.title,
+        category: c.category,
+        locationCount: colLocs.length,
+        completion,
+      };
+    });
+    setCollections(cards);
+  };
 
   useEffect(() => {
     let active = true;
@@ -171,27 +228,42 @@ function Dashboard() {
         ) : (
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {collections.map((c) => (
-              <Link
+              <div
                 key={c.id}
-                to="/collections/$collectionId"
-                params={{ collectionId: c.id }}
-                className="group block rounded-xl border border-border bg-surface p-6 transition hover:border-gold/60 hover:bg-surface-raised"
+                className="group relative rounded-xl border border-border bg-surface p-6 transition hover:border-gold/60 hover:bg-surface-raised"
               >
-                {c.category && (
-                  <div className="font-mono-tag text-gold">{c.category}</div>
-                )}
-                <h3 className="font-display mt-3 text-2xl text-ink">{c.title}</h3>
-                <div className="mt-5 flex items-center justify-between text-sm text-ink-muted">
-                  <span>{c.locationCount} {c.locationCount === 1 ? "place" : "places"}</span>
-                  <span className="font-mono-tag text-gold">{c.completion}%</span>
-                </div>
-                <div className="mt-3 h-1 w-full overflow-hidden rounded-full bg-background">
-                  <div
-                    className="h-full bg-gold transition-all"
-                    style={{ width: `${c.completion}%` }}
-                  />
-                </div>
-              </Link>
+                <Link
+                  to="/collections/$collectionId"
+                  params={{ collectionId: c.id }}
+                  className="block"
+                >
+                  {c.category && (
+                    <div className="font-mono-tag text-gold">{c.category}</div>
+                  )}
+                  <h3 className="font-display mt-3 text-2xl text-ink">{c.title}</h3>
+                  <div className="mt-5 flex items-center justify-between text-sm text-ink-muted">
+                    <span>{c.locationCount} {c.locationCount === 1 ? "place" : "places"}</span>
+                    <span className="font-mono-tag text-gold">{c.completion}%</span>
+                  </div>
+                  <div className="mt-3 h-1 w-full overflow-hidden rounded-full bg-background">
+                    <div
+                      className="h-full bg-gold transition-all"
+                      style={{ width: `${c.completion}%` }}
+                    />
+                  </div>
+                </Link>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDeleteCollectionId(c.id);
+                    setDeleteCollectionTitle(c.title);
+                  }}
+                  aria-label="Delete collection"
+                  className="absolute right-3 top-3 rounded-md p-1.5 text-ink-muted opacity-0 transition hover:bg-surface-raised hover:text-destructive group-hover:opacity-100"
+                >
+                  <Trash2 className="h-3.5 w-3.5" strokeWidth={2} />
+                </button>
+              </div>
             ))}
           </div>
         )}
@@ -210,6 +282,30 @@ function Dashboard() {
         onOpenChange={setCreateOpen}
         userId={user.id}
       />
+
+      <AlertDialog open={Boolean(deleteCollectionId)} onOpenChange={(v) => { if (!v) { setDeleteCollectionId(null); setDeleteCollectionTitle(""); } }}>
+        <AlertDialogContent className="border-border bg-surface text-ink">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display text-2xl text-ink">
+              Delete this collection?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-ink-muted">
+              {deleteCollectionTitle ? `"${deleteCollectionTitle}" and all its places will be removed. This cannot be undone.` : ""}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="border-border bg-transparent text-ink hover:bg-surface-raised">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteCollection}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </main>
   );
 }

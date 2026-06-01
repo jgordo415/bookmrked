@@ -6,6 +6,7 @@ import { AddPlaceModal } from "@/components/AddPlaceModal";
 import { MarkVisitedModal, type VisitData } from "@/components/MarkVisitedModal";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { BottomNav } from "@/components/BottomNav";
+import { Input } from "@/components/ui/input";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,6 +17,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/collections/$collectionId")({
   component: CollectionDetail,
@@ -55,6 +57,12 @@ function CollectionDetail() {
   const [deletePlace, setDeletePlace] = useState<Place | null>(null);
   const [editVisitPlace, setEditVisitPlace] = useState<Place | null>(null);
   const [copied, setCopied] = useState(false);
+  const [unmarkPlace, setUnmarkPlace] = useState<Place | null>(null);
+  const [editCollectionOpen, setEditCollectionOpen] = useState(false);
+  const [editTitle, setEditTitle] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [savingCollection, setSavingCollection] = useState(false);
+  const [deleteCollectionOpen, setDeleteCollectionOpen] = useState(false);
 
   const loadPlaces = useCallback(
     async (uid: string) => {
@@ -106,6 +114,46 @@ function CollectionDetail() {
     await supabase.from("locations").delete().eq("id", id);
     setDeletePlace(null);
     await loadPlaces(userId);
+  };
+
+  const handleUnmarkVisit = async () => {
+    if (!unmarkPlace || !userId) return;
+    await supabase.from("visits").delete().eq("location_id", unmarkPlace.id).eq("user_id", userId);
+    setVisits((prev) => {
+      const next = { ...prev };
+      delete next[unmarkPlace.id];
+      return next;
+    });
+    setUnmarkPlace(null);
+  };
+
+  const handleUpdateCollection = async () => {
+    if (!collection || !userId) return;
+    const title = editTitle.trim();
+    if (!title) return;
+    setSavingCollection(true);
+    const { error: err } = await supabase
+      .from("collections")
+      .update({ title, description: editDescription.trim() || null })
+      .eq("id", collection.id)
+      .eq("user_id", userId);
+    setSavingCollection(false);
+    if (err) return;
+    setCollection((prev) => prev ? { ...prev, title, description: editDescription.trim() || null } : prev);
+    setEditCollectionOpen(false);
+  };
+
+  const handleDeleteCollection = async () => {
+    if (!collection || !userId) return;
+    const { data: locs } = await supabase.from("locations").select("id").eq("collection_id", collectionId);
+    const locIds = (locs ?? []).map((l) => l.id);
+    if (locIds.length > 0) {
+      await supabase.from("visits").delete().in("location_id", locIds).eq("user_id", userId);
+      await supabase.from("locations").delete().in("id", locIds);
+    }
+    await supabase.from("collections").delete().eq("id", collectionId);
+    setDeleteCollectionOpen(false);
+    navigate({ to: "/dashboard" });
   };
 
   useEffect(() => {
@@ -199,9 +247,27 @@ function CollectionDetail() {
           {collection.category && (
             <div className="font-mono-tag text-gold">{collection.category}</div>
           )}
-          <h1 className="font-display mt-3 text-5xl text-ink sm:text-6xl">
-            {collection.title}
-          </h1>
+          <div className="flex items-start justify-between gap-4">
+            <h1 className="font-display mt-3 text-5xl text-ink sm:text-6xl">
+              {collection.title}
+            </h1>
+            <div className="mt-3 flex items-center gap-1">
+              <button
+                onClick={() => { setEditTitle(collection.title); setEditDescription(collection.description ?? ""); setEditCollectionOpen(true); }}
+                aria-label="Edit collection"
+                className="rounded-md p-2 text-ink-muted transition hover:bg-surface-raised hover:text-gold"
+              >
+                <Pencil className="h-4 w-4" strokeWidth={2} />
+              </button>
+              <button
+                onClick={() => setDeleteCollectionOpen(true)}
+                aria-label="Delete collection"
+                className="rounded-md p-2 text-ink-muted transition hover:bg-surface-raised hover:text-destructive"
+              >
+                <Trash2 className="h-4 w-4" strokeWidth={2} />
+              </button>
+            </div>
+          </div>
           {collection.description && (
             <p className="mt-4 max-w-xl text-ink-muted">{collection.description}</p>
           )}
@@ -313,7 +379,7 @@ function CollectionDetail() {
                       <div className="flex shrink-0 flex-col items-end gap-2">
                         {isVisited ? (
                           <button
-                            onClick={() => setEditVisitPlace(p)}
+                            onClick={() => setUnmarkPlace(p)}
                             className="rounded-md border border-gold/40 px-3 py-2 text-xs font-medium text-gold transition hover:bg-gold/10"
                           >
                             Visited ✓
@@ -327,6 +393,15 @@ function CollectionDetail() {
                           </button>
                         )}
                         <div className="flex items-center gap-1">
+                          {isVisited && (
+                            <button
+                              onClick={() => setEditVisitPlace(p)}
+                              aria-label="Edit visit"
+                              className="rounded-md p-1.5 text-ink-muted transition hover:bg-surface-raised hover:text-gold"
+                            >
+                              <Star className="h-3.5 w-3.5" strokeWidth={2} />
+                            </button>
+                          )}
                           <button
                             onClick={() => setEditPlace(p)}
                             aria-label="Edit place"
@@ -427,6 +502,103 @@ function CollectionDetail() {
               </AlertDialogCancel>
               <AlertDialogAction
                 onClick={handleDeletePlace}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Unmark visit */}
+        <AlertDialog open={Boolean(unmarkPlace)} onOpenChange={(v) => { if (!v) setUnmarkPlace(null); }}>
+          <AlertDialogContent className="border-border bg-surface text-ink">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="font-display text-2xl text-ink">
+                Mark as not visited?
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-ink-muted">
+                {unmarkPlace ? `"${unmarkPlace.name}" will be marked as unvisited and your rating and notes will be removed.` : ""}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel className="border-border bg-transparent text-ink hover:bg-surface-raised">
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleUnmarkVisit}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Unmark
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Edit collection */}
+        <Dialog open={editCollectionOpen} onOpenChange={(v) => { if (!v) setEditCollectionOpen(false); }}>
+          <DialogContent className="border-border bg-surface text-ink sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="font-display text-3xl text-ink">Edit collection</DialogTitle>
+            </DialogHeader>
+            <div className="mt-2 space-y-4">
+              <div>
+                <label className="font-mono-tag text-ink-muted">Name</label>
+                <Input
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  placeholder="Collection name"
+                  className="mt-2 border-border bg-background text-ink placeholder:text-ink-muted/60"
+                />
+              </div>
+              <div>
+                <label className="font-mono-tag text-ink-muted">Description</label>
+                <textarea
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
+                  rows={3}
+                  placeholder="Optional description"
+                  className="mt-2 w-full resize-none rounded-md border border-border bg-background px-3 py-2 text-sm text-ink placeholder:text-ink-muted/60 focus:border-gold focus:outline-none"
+                />
+              </div>
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setEditCollectionOpen(false)}
+                  className="font-mono-tag text-ink-muted hover:text-ink"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleUpdateCollection}
+                  disabled={savingCollection || !editTitle.trim()}
+                  className="rounded-md bg-gold px-5 py-2 text-sm font-medium text-primary-foreground transition hover:bg-gold-soft disabled:opacity-60"
+                >
+                  {savingCollection ? "Saving…" : "Save changes"}
+                </button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete collection */}
+        <AlertDialog open={deleteCollectionOpen} onOpenChange={(v) => { if (!v) setDeleteCollectionOpen(false); }}>
+          <AlertDialogContent className="border-border bg-surface text-ink">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="font-display text-2xl text-ink">
+                Delete this collection?
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-ink-muted">
+                {collection ? `"${collection.title}" and all its places will be removed. This cannot be undone.` : ""}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel className="border-border bg-transparent text-ink hover:bg-surface-raised">
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDeleteCollection}
                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               >
                 Delete
