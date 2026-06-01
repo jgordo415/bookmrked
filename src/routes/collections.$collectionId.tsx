@@ -37,6 +37,7 @@ function CollectionDetail() {
   const [places, setPlaces] = useState<Place[]>([]);
   const [visits, setVisits] = useState<Record<string, VisitData>>({});
   const [addOpen, setAddOpen] = useState(false);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [markPlace, setMarkPlace] = useState<Place | null>(null);
 
   const loadPlaces = useCallback(
