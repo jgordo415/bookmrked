@@ -3,25 +3,32 @@ import { useEffect, useState } from "react";
 import { Check, Star, MapPin, Bookmark } from "lucide-react";
 import { AuthModal } from "@/components/AuthModal";
 import { supabase } from "@/integrations/supabase/client";
+import ogImage from "@/assets/og-default.jpg";
 
 export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "Bookmrked — Save it. Visit it. Come back to it." },
-      {
-        name: "description",
-        content:
-          "Bookmrked is a personal curation tool for the places worth revisiting — coffee shops, restaurants, galleries, record stores. Build your own map of the world worth coming back to.",
-      },
-      { property: "og:title", content: "Bookmrked — Save it. Visit it. Come back to it." },
-      {
-        property: "og:description",
-        content:
-          "A personal curation tool for the places worth revisiting. Save, organize, and track every spot worth coming back to.",
-      },
-      { property: "og:type", content: "website" },
-    ],
-  }),
+  head: () => {
+    const title = "Bookmrked — Save it. Visit it. Come back to it.";
+    const description = "A quiet, deliberate place to keep the spots worth remembering — the coffee, the record store, the gallery you walked past twice and finally went in.";
+    const ogImageUrl = `https://bookmrked.com${ogImage}`;
+
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "website" },
+        { property: "og:url", content: "https://bookmrked.com" },
+        { property: "og:image", content: ogImageUrl },
+        { name: "twitter:title", content: title },
+        { name: "twitter:description", content: description },
+        { name: "twitter:image", content: ogImageUrl },
+      ],
+      links: [
+        { rel: "canonical", href: "https://bookmrked.com" },
+      ],
+    };
+  },
   component: Landing,
 });
 
