@@ -215,17 +215,29 @@ function CollectionDetail() {
   const handleShare = async () => {
     if (!collection.share_token) return;
     const url = `https://bookmrked.com/c/${collection.share_token}`;
+    const shareData = { title: collection.title, text: `Check out "${collection.title}" on Bookmrked`, url };
+
     try {
-      if (navigator.share) {
-        await navigator.share({ title: collection.title, url });
+      if (navigator.share && (!navigator.canShare || navigator.canShare(shareData))) {
+        await navigator.share(shareData);
       } else {
         await navigator.clipboard.writeText(url);
         setCopied(true);
         showToast("Copied to clipboard");
         setTimeout(() => setCopied(false), 2000);
       }
-    } catch {
-      // user cancelled share
+    } catch (err) {
+      if (err instanceof Error && err.name !== "AbortError") {
+        // Share failed for a non-user reason — fall back to clipboard
+        try {
+          await navigator.clipboard.writeText(url);
+          setCopied(true);
+          showToast("Copied to clipboard");
+          setTimeout(() => setCopied(false), 2000);
+        } catch {
+          // Clipboard also unavailable — silently fail
+        }
+      }
     }
   };
 
