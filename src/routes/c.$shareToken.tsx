@@ -107,7 +107,7 @@ function SharedCollection() {
   }
 
   const total = places.length;
-  const visited = places.reduce((acc, p) => acc + (p.visited ? 1 : 0), 0);
+  const visited = places.reduce((acc: number, p: SharedPlace) => acc + (p.visited ? 1 : 0), 0);
   const pct = total === 0 ? 0 : Math.round((visited / total) * 100);
 
   return (
