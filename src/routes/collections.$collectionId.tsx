@@ -7,6 +7,7 @@ import { MarkVisitedModal, type VisitData } from "@/components/MarkVisitedModal"
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { BottomNav } from "@/components/BottomNav";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/useToast";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -63,6 +64,8 @@ function CollectionDetail() {
   const [editDescription, setEditDescription] = useState("");
   const [savingCollection, setSavingCollection] = useState(false);
   const [deleteCollectionOpen, setDeleteCollectionOpen] = useState(false);
+
+  const { showToast } = useToast();
 
   const loadPlaces = useCallback(
     async (uid: string) => {
@@ -125,6 +128,7 @@ function CollectionDetail() {
       return next;
     });
     setUnmarkPlace(null);
+    showToast("Unvisited");
   };
 
   const handleUpdateCollection = async () => {
@@ -141,6 +145,7 @@ function CollectionDetail() {
     if (err) return;
     setCollection((prev) => prev ? { ...prev, title, description: editDescription.trim() || null } : prev);
     setEditCollectionOpen(false);
+    showToast("Changes saved");
   };
 
   const handleDeleteCollection = async () => {
@@ -216,6 +221,7 @@ function CollectionDetail() {
       } else {
         await navigator.clipboard.writeText(url);
         setCopied(true);
+        showToast("Copied to clipboard");
         setTimeout(() => setCopied(false), 2000);
       }
     } catch {

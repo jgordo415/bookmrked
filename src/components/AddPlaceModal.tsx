@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/useToast";
 
 const CATEGORIES = [
   "Food and drink",
@@ -37,6 +38,7 @@ export function AddPlaceModal({
     notes: string | null;
   } | null;
 }) {
+  const { showToast } = useToast();
   const initialCategory =
     defaultCategory && CATEGORIES.includes(defaultCategory) ? defaultCategory : CATEGORIES[0];
 
@@ -99,6 +101,7 @@ export function AddPlaceModal({
     }
     reset();
     onOpenChange(false);
+    showToast(isEdit ? "Changes saved" : "Place saved");
     onCreated();
   };
 

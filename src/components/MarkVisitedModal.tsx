@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/useToast";
 import { Star } from "lucide-react";
 
 const MAX_NOTE = 150;
@@ -34,6 +35,8 @@ export function MarkVisitedModal({
   const [note, setNote] = useState(initial?.note ?? "");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const { showToast } = useToast();
 
   const reset = () => {
     setRating(initial?.star_rating ?? 0);
@@ -70,6 +73,7 @@ export function MarkVisitedModal({
       return;
     }
     onSaved({ star_rating: rating, note: trimmed || null, visited_at });
+    showToast("Visited!");
     onOpenChange(false);
   };
 
