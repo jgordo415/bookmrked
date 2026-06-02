@@ -1,13 +1,85 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { getSharedCollection } from "@/lib/share.functions";
 import { MapPin, Check, Star, Bookmark } from "lucide-react";
+import ogImage from "@/assets/og-default.jpg";
+
+function ShareNotFound() {
+  return (
+    <main className="flex min-h-screen flex-col items-center justify-center bg-background">
+      <div className="font-mono-tag text-ink-muted">
+        This collection isn't available
+      </div>
+      <Link to="/" className="mt-4 text-gold hover:text-gold-soft">
+        Go home
+      </Link>
+    </main>
+  );
+}
+
+function ShareError({ error, reset }: { error: Error; reset: () => void }) {
+  return (
+    <main className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
+      <div className="max-w-md text-center">
+        <div className="font-mono-tag text-destructive">Something went wrong</div>
+        <p className="mt-2 text-sm text-ink-muted">{error.message}</p>
+        <button
+          onClick={reset}
+          className="mt-6 inline-flex items-center justify-center rounded-md bg-gold px-4 py-2 text-sm font-medium text-primary-foreground transition hover:bg-gold-soft"
+        >
+          Try again
+        </button>
+      </div>
+    </main>
+  );
+}
 
 export const Route = createFileRoute("/c/$shareToken")({
+  loader: async ({ params }) => {
+    const data = await getSharedCollection({ data: { shareToken: params.shareToken } });
+    return data;
+  },
+  head: ({ params, loaderData }) => {
+    const collection = loaderData.collection;
+    const places = loaderData.places;
+    const placeCount = places.length;
+
+    const title = collection
+      ? `${collection.title} — Bookmrked`
+      : "Shared Collection — Bookmrked";
+
+    const descParts: string[] = [];
+    if (collection?.description) descParts.push(collection.description);
+    descParts.push(`${placeCount} place${placeCount === 1 ? "" : "s"} · Shared collection on Bookmrked`);
+    const description = descParts.join(" · ");
+
+    const shareUrl = `https://bookmrked.com/c/${params.shareToken}`;
+    const ogImageUrl = `https://bookmrked.com${ogImage}`;
+
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "website" },
+        { property: "og:url", content: shareUrl },
+        { property: "og:image", content: ogImageUrl },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: title },
+        { name: "twitter:description", content: description },
+        { name: "twitter:image", content: ogImageUrl },
+      ],
+      links: [
+        { rel: "canonical", href: shareUrl },
+      ],
+    };
+  },
   component: SharedCollection,
+  notFoundComponent: ShareNotFound,
+  errorComponent: ShareError,
 });
 
-type SharedCollection = {
+type SharedCollectionType = {
   id: string;
   title: string;
   description: string | null;
@@ -28,57 +100,10 @@ type SharedPlace = {
 };
 
 function SharedCollection() {
-  const { shareToken } = Route.useParams();
-  const [collection, setCollection] = useState<SharedCollection | null>(null);
-  const [places, setPlaces] = useState<SharedPlace[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [notFound, setNotFound] = useState(false);
+  const { collection, places } = Route.useLoaderData();
 
-  useEffect(() => {
-    let active = true;
-    (async () => {
-      const { data: cData } = await supabase.rpc("get_shared_collection", {
-        _token: shareToken,
-      });
-      if (!active) return;
-      const c = (cData ?? [])[0] as SharedCollection | undefined;
-      if (!c) {
-        setNotFound(true);
-        setLoading(false);
-        return;
-      }
-      setCollection(c);
-      const { data: pData } = await supabase.rpc("get_shared_places", {
-        _token: shareToken,
-      });
-      if (!active) return;
-      setPlaces((pData ?? []) as SharedPlace[]);
-      setLoading(false);
-    })();
-    return () => {
-      active = false;
-    };
-  }, [shareToken]);
-
-  if (loading) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-background">
-        <div className="font-mono-tag text-ink-muted">Loading…</div>
-      </main>
-    );
-  }
-
-  if (notFound || !collection) {
-    return (
-      <main className="flex min-h-screen flex-col items-center justify-center bg-background">
-        <div className="font-mono-tag text-ink-muted">
-          This collection isn’t available
-        </div>
-        <Link to="/" className="mt-4 text-gold hover:text-gold-soft">
-          Go home
-        </Link>
-      </main>
-    );
+  if (!collection) {
+    return <ShareNotFound />;
   }
 
   const total = places.length;
@@ -179,7 +204,7 @@ function SharedCollection() {
                 )}
                 {p.visited && p.visit_note && (
                   <p className="mt-2 text-sm italic text-ink-muted">
-                    “{p.visit_note}”
+                    "{p.visit_note}"
                   </p>
                 )}
               </li>
