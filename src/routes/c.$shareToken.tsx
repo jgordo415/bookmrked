@@ -158,7 +158,7 @@ function SharedCollection() {
           </div>
         ) : (
           <ul className="mt-10 space-y-3">
-            {places.map((p) => (
+            {places.map((p: SharedPlace) => (
               <li
                 key={p.id}
                 className="rounded-xl border border-border bg-surface/60 p-5"
