@@ -33,10 +33,14 @@ export const Route = createRootRoute({
       { title: "Bookmrked — Save it. Visit it. Come back to it." },
       { name: "description", content: "A quiet, deliberate place to keep the spots worth remembering — the coffee, the record store, the gallery you walked past twice and finally went in." },
       { name: "author", content: "Bookmrked" },
+      { property: "og:title", content: "Bookmrked — Save it. Visit it. Come back to it." },
+      { property: "og:description", content: "A quiet, deliberate place to keep the spots worth remembering — the coffee, the record store, the gallery you walked past twice and finally went in." },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "Bookmrked" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@bookmrked" },
+      { name: "twitter:title", content: "Bookmrked — Save it. Visit it. Come back to it." },
+      { name: "twitter:description", content: "A quiet, deliberate place to keep the spots worth remembering — the coffee, the record store, the gallery you walked past twice and finally went in." },
     ],
     links: [
       {
