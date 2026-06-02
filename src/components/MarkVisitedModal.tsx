@@ -36,6 +36,8 @@ export function MarkVisitedModal({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const { showToast } = useToast();
+
   const reset = () => {
     setRating(initial?.star_rating ?? 0);
     setHover(0);
@@ -71,6 +73,7 @@ export function MarkVisitedModal({
       return;
     }
     onSaved({ star_rating: rating, note: trimmed || null, visited_at });
+    showToast("Visited!");
     onOpenChange(false);
   };
 

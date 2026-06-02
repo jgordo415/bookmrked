@@ -65,6 +65,8 @@ function CollectionDetail() {
   const [savingCollection, setSavingCollection] = useState(false);
   const [deleteCollectionOpen, setDeleteCollectionOpen] = useState(false);
 
+  const { showToast } = useToast();
+
   const loadPlaces = useCallback(
     async (uid: string) => {
       const { data: locs } = await supabase
@@ -126,6 +128,7 @@ function CollectionDetail() {
       return next;
     });
     setUnmarkPlace(null);
+    showToast("Unvisited");
   };
 
   const handleUpdateCollection = async () => {
@@ -142,6 +145,7 @@ function CollectionDetail() {
     if (err) return;
     setCollection((prev) => prev ? { ...prev, title, description: editDescription.trim() || null } : prev);
     setEditCollectionOpen(false);
+    showToast("Changes saved");
   };
 
   const handleDeleteCollection = async () => {
@@ -217,6 +221,7 @@ function CollectionDetail() {
       } else {
         await navigator.clipboard.writeText(url);
         setCopied(true);
+        showToast("Copied to clipboard");
         setTimeout(() => setCopied(false), 2000);
       }
     } catch {

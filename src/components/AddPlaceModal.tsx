@@ -101,6 +101,7 @@ export function AddPlaceModal({
     }
     reset();
     onOpenChange(false);
+    showToast(isEdit ? "Changes saved" : "Place saved");
     onCreated();
   };
 

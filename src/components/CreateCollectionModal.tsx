@@ -32,6 +32,8 @@ export function CreateCollectionModal({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const { showToast } = useToast();
+
   const reset = () => {
     setTitle("");
     setDescription("");
@@ -63,6 +65,7 @@ export function CreateCollectionModal({
     }
     reset();
     onOpenChange(false);
+    showToast("Collection created");
     navigate({ to: "/collections/$collectionId", params: { collectionId: data.id } });
   };
 
