@@ -38,6 +38,7 @@ export function AddPlaceModal({
     notes: string | null;
   } | null;
 }) {
+  const { showToast } = useToast();
   const initialCategory =
     defaultCategory && CATEGORIES.includes(defaultCategory) ? defaultCategory : CATEGORIES[0];
 
