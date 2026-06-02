@@ -7,6 +7,7 @@ import { MarkVisitedModal, type VisitData } from "@/components/MarkVisitedModal"
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { BottomNav } from "@/components/BottomNav";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/useToast";
 import {
   AlertDialog,
   AlertDialogAction,
