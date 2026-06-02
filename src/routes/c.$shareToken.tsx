@@ -39,8 +39,8 @@ export const Route = createFileRoute("/c/$shareToken")({
     return data;
   },
   head: ({ params, loaderData }) => {
-    const collection = loaderData.collection;
-    const places = loaderData.places;
+    const collection = loaderData?.collection ?? null;
+    const places = loaderData?.places ?? [];
     const placeCount = places.length;
 
     const title = collection
