@@ -529,6 +529,16 @@ function CollectionDetail() {
             placeName={markPlace.name}
             onSaved={(data) => {
               setVisits((prev) => ({ ...prev, [markPlace.id]: data }));
+              const wasVisited = Boolean(visits[markPlace.id]);
+              if (!wasVisited && places.length > 0) {
+                const visitedCount = places.reduce(
+                  (acc, p) => acc + (p.id === markPlace.id || visits[p.id] ? 1 : 0),
+                  0,
+                );
+                if (visitedCount === places.length) {
+                  setCelebrationOpen(true);
+                }
+              }
               setMarkPlace(null);
             }}
           />
