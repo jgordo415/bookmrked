@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
-import { Bookmark, Plus, Trash2 } from "lucide-react";
+import { Bookmark, Plus, Trash2, X } from "lucide-react";
 import { CreateCollectionModal } from "@/components/CreateCollectionModal";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { BottomNav } from "@/components/BottomNav";
@@ -39,6 +39,17 @@ function Dashboard() {
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [deleteCollectionId, setDeleteCollectionId] = useState<string | null>(null);
   const [deleteCollectionTitle, setDeleteCollectionTitle] = useState("");
+  const [onboardingDismissed, setOnboardingDismissed] = useState(true);
+
+  useEffect(() => {
+    const dismissed = localStorage.getItem("bookmrked_onboarding_dismissed") === "true";
+    setOnboardingDismissed(dismissed);
+  }, []);
+
+  const dismissOnboarding = () => {
+    localStorage.setItem("bookmrked_onboarding_dismissed", "true");
+    setOnboardingDismissed(true);
+  };
 
   const handleDeleteCollection = async () => {
     if (!deleteCollectionId || !user) return;
@@ -154,6 +165,7 @@ function Dashboard() {
   }, [user]);
 
   const handleCreateClick = () => {
+    dismissOnboarding();
     if (collections.length >= 5) {
       setUpgradeOpen(true);
     } else {
@@ -209,6 +221,33 @@ function Dashboard() {
           <div className="mt-16 font-mono-tag text-ink-muted">Loading…</div>
         ) : collections.length === 0 ? (
           <div className="mt-20 rounded-xl border border-dashed border-border bg-surface/40 p-12 text-center">
+            {!onboardingDismissed && (
+              <div
+                onClick={dismissOnboarding}
+                className="animate-fade-in mx-auto mb-8 max-w-lg cursor-pointer rounded-lg border border-gold/30 bg-surface-raised p-6 text-left transition hover:border-gold/50"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <p className="text-[15px] leading-relaxed text-ink">
+                    <span className="font-display text-lg text-gold">Welcome to Bookmrked</span>
+                    <span className="block mt-1">
+                      This is your space to save the spots worth remembering. Coffee shops, record
+                      stores, galleries, hidden bars — anything worth coming back to.
+                    </span>
+                  </p>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      dismissOnboarding();
+                    }}
+                    aria-label="Dismiss welcome message"
+                    className="shrink-0 rounded-md p-1 text-ink-muted transition hover:text-gold"
+                  >
+                    <X className="h-4 w-4" strokeWidth={2.5} />
+                  </button>
+                </div>
+              </div>
+            )}
             <div className="font-mono-tag text-gold">Empty shelf</div>
             <h2 className="font-display mt-4 text-4xl text-ink">
               Start your first collection
