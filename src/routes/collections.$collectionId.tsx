@@ -64,6 +64,7 @@ function CollectionDetail() {
   const [editDescription, setEditDescription] = useState("");
   const [savingCollection, setSavingCollection] = useState(false);
   const [deleteCollectionOpen, setDeleteCollectionOpen] = useState(false);
+  const [togglingPrivacy, setTogglingPrivacy] = useState(false);
 
   const { showToast } = useToast();
 
@@ -161,6 +162,32 @@ function CollectionDetail() {
     navigate({ to: "/dashboard" });
   };
 
+  const handleTogglePrivacy = async () => {
+    if (!collection || !userId || togglingPrivacy) return;
+    setTogglingPrivacy(true);
+    const makeShareable = collection.privacy !== "shareable";
+    let nextToken = collection.share_token;
+    if (makeShareable && !nextToken) {
+      const bytes = new Uint8Array(12);
+      crypto.getRandomValues(bytes);
+      nextToken = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+    }
+    const update = makeShareable
+      ? { privacy: "shareable", share_token: nextToken }
+      : { privacy: "private", share_token: null };
+    const { error: err } = await supabase
+      .from("collections")
+      .update(update)
+      .eq("id", collection.id)
+      .eq("user_id", userId);
+    setTogglingPrivacy(false);
+    if (err) return;
+    setCollection((prev) =>
+      prev ? { ...prev, privacy: update.privacy, share_token: update.share_token } : prev,
+    );
+    showToast(makeShareable ? "Now shareable" : "Now private");
+  };
+
   useEffect(() => {
     let active = true;
     (async () => {
@@ -254,7 +281,8 @@ function CollectionDetail() {
           </Link>
           <button
             onClick={handleShare}
-            className="inline-flex items-center gap-2 rounded-md border border-gold/40 px-3 py-1.5 font-mono-tag text-xs text-gold transition hover:bg-gold hover:text-primary-foreground"
+            disabled={collection.privacy !== "shareable" || !collection.share_token}
+            className="inline-flex items-center gap-2 rounded-md border border-gold/40 px-3 py-1.5 font-mono-tag text-xs text-gold transition hover:bg-gold hover:text-primary-foreground disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-gold"
           >
             <Share2 className="h-3.5 w-3.5" strokeWidth={2.5} />
             {copied ? "Link copied" : "Share"}
@@ -289,8 +317,31 @@ function CollectionDetail() {
           {collection.description && (
             <p className="mt-4 max-w-xl text-ink-muted">{collection.description}</p>
           )}
-          <div className="mt-4 font-mono-tag text-ink-muted/70">
-            {collection.privacy === "shareable" ? "Shareable" : "Private"}
+          <div className="mt-4 inline-flex items-center gap-2 rounded-md border border-border bg-background p-1">
+            <button
+              type="button"
+              onClick={() => { if (collection.privacy !== "private") handleTogglePrivacy(); }}
+              disabled={togglingPrivacy}
+              className={`rounded px-3 py-1 font-mono-tag text-xs transition ${
+                collection.privacy === "private"
+                  ? "bg-gold text-primary-foreground"
+                  : "text-ink-muted hover:text-ink"
+              }`}
+            >
+              Private
+            </button>
+            <button
+              type="button"
+              onClick={() => { if (collection.privacy !== "shareable") handleTogglePrivacy(); }}
+              disabled={togglingPrivacy}
+              className={`rounded px-3 py-1 font-mono-tag text-xs transition ${
+                collection.privacy === "shareable"
+                  ? "bg-gold text-primary-foreground"
+                  : "text-ink-muted hover:text-ink"
+              }`}
+            >
+              Shareable
+            </button>
           </div>
         </div>
 
