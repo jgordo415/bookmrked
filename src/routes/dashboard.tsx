@@ -39,6 +39,17 @@ function Dashboard() {
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [deleteCollectionId, setDeleteCollectionId] = useState<string | null>(null);
   const [deleteCollectionTitle, setDeleteCollectionTitle] = useState("");
+  const [onboardingDismissed, setOnboardingDismissed] = useState(true);
+
+  useEffect(() => {
+    const dismissed = localStorage.getItem("bookmrked_onboarding_dismissed") === "true";
+    setOnboardingDismissed(dismissed);
+  }, []);
+
+  const dismissOnboarding = () => {
+    localStorage.setItem("bookmrked_onboarding_dismissed", "true");
+    setOnboardingDismissed(true);
+  };
 
   const handleDeleteCollection = async () => {
     if (!deleteCollectionId || !user) return;
