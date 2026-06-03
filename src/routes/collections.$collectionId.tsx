@@ -6,6 +6,7 @@ import { AddPlaceModal } from "@/components/AddPlaceModal";
 import { MarkVisitedModal, type VisitData } from "@/components/MarkVisitedModal";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { BottomNav } from "@/components/BottomNav";
+import { CompletionCelebration } from "@/components/CompletionCelebration";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/useToast";
 import {
@@ -65,6 +66,7 @@ function CollectionDetail() {
   const [savingCollection, setSavingCollection] = useState(false);
   const [deleteCollectionOpen, setDeleteCollectionOpen] = useState(false);
   const [togglingPrivacy, setTogglingPrivacy] = useState(false);
+  const [celebrationOpen, setCelebrationOpen] = useState(false);
 
   const { showToast } = useToast();
 
