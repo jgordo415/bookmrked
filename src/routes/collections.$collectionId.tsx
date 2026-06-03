@@ -6,6 +6,7 @@ import { AddPlaceModal } from "@/components/AddPlaceModal";
 import { MarkVisitedModal, type VisitData } from "@/components/MarkVisitedModal";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { BottomNav } from "@/components/BottomNav";
+import { CompletionCelebration } from "@/components/CompletionCelebration";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/useToast";
 import {
@@ -65,6 +66,7 @@ function CollectionDetail() {
   const [savingCollection, setSavingCollection] = useState(false);
   const [deleteCollectionOpen, setDeleteCollectionOpen] = useState(false);
   const [togglingPrivacy, setTogglingPrivacy] = useState(false);
+  const [celebrationOpen, setCelebrationOpen] = useState(false);
 
   const { showToast } = useToast();
 
@@ -527,6 +529,16 @@ function CollectionDetail() {
             placeName={markPlace.name}
             onSaved={(data) => {
               setVisits((prev) => ({ ...prev, [markPlace.id]: data }));
+              const wasVisited = Boolean(visits[markPlace.id]);
+              if (!wasVisited && places.length > 0) {
+                const visitedCount = places.reduce(
+                  (acc, p) => acc + (p.id === markPlace.id || visits[p.id] ? 1 : 0),
+                  0,
+                );
+                if (visitedCount === places.length) {
+                  setCelebrationOpen(true);
+                }
+              }
               setMarkPlace(null);
             }}
           />
@@ -676,6 +688,20 @@ function CollectionDetail() {
           </AlertDialogContent>
         </AlertDialog>
       </div>
+
+      <CompletionCelebration
+        open={celebrationOpen}
+        collectionTitle={collection.title}
+        canShare={collection.privacy === "shareable" && Boolean(collection.share_token)}
+        onShare={() => {
+          handleShare();
+        }}
+        onStartNew={() => {
+          setCelebrationOpen(false);
+          navigate({ to: "/dashboard" });
+        }}
+        onClose={() => setCelebrationOpen(false)}
+      />
     </main>
   );
 }

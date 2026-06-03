@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
-import { Bookmark, Plus, Trash2, X } from "lucide-react";
+import { Bookmark, Plus, Trash2, X, Check } from "lucide-react";
 import { CreateCollectionModal } from "@/components/CreateCollectionModal";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { BottomNav } from "@/components/BottomNav";
@@ -276,6 +276,12 @@ function Dashboard() {
                   params={{ collectionId: c.id }}
                   className="block"
                 >
+                  {c.locationCount > 0 && c.completion === 100 && (
+                    <div className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-gold px-2.5 py-1 font-mono-tag text-[10px] uppercase tracking-wider text-primary-foreground shadow-[0_2px_8px_rgba(212,175,55,0.4)]">
+                      <Check className="h-3 w-3" strokeWidth={3} />
+                      Complete
+                    </div>
+                  )}
                   {c.category && (
                     <div className="font-mono-tag text-gold">{c.category}</div>
                   )}
