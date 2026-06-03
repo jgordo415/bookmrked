@@ -688,6 +688,20 @@ function CollectionDetail() {
           </AlertDialogContent>
         </AlertDialog>
       </div>
+
+      <CompletionCelebration
+        open={celebrationOpen}
+        collectionTitle={collection.title}
+        canShare={collection.privacy === "shareable" && Boolean(collection.share_token)}
+        onShare={() => {
+          handleShare();
+        }}
+        onStartNew={() => {
+          setCelebrationOpen(false);
+          navigate({ to: "/dashboard" });
+        }}
+        onClose={() => setCelebrationOpen(false)}
+      />
     </main>
   );
 }
