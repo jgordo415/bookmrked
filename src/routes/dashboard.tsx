@@ -165,6 +165,7 @@ function Dashboard() {
   }, [user]);
 
   const handleCreateClick = () => {
+    dismissOnboarding();
     if (collections.length >= 5) {
       setUpgradeOpen(true);
     } else {
