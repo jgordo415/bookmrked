@@ -76,6 +76,21 @@ function Landing() {
   const [signInOpen, setSignInOpen] = useState(false);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("signin") === "1") {
+      setSignInOpen(true);
+      params.delete("signin");
+      const qs = params.toString();
+      window.history.replaceState(
+        null,
+        "",
+        window.location.pathname + (qs ? `?${qs}` : "") + window.location.hash,
+      );
+    }
+  }, []);
+
+  useEffect(() => {
     let active = true;
     supabase.auth.getSession().then(({ data }) => {
       if (active && data.session) {
