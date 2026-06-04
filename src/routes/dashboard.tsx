@@ -102,11 +102,11 @@ function Dashboard() {
       if (!active) return;
       setUser(data.user ?? null);
       setLoading(false);
-      if (!data.user) navigate({ to: "/" });
+      if (!data.user) navigate({ to: "/", search: { signin: 1 } as never, replace: true });
     });
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
       setUser(session?.user ?? null);
-      if (!session?.user) navigate({ to: "/" });
+      if (!session?.user) navigate({ to: "/", search: { signin: 1 } as never, replace: true });
     });
     return () => {
       active = false;
