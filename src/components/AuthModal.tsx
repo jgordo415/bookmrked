@@ -34,6 +34,9 @@ export function AuthModal({
     if (!email) return;
     setStatus("sending");
     setErrorMsg("");
+    try {
+      localStorage.setItem("bookmrked_last_email", email);
+    } catch {}
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
