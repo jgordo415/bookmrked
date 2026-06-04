@@ -1,5 +1,6 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { ToastProvider } from "@/hooks/useToast";
+import { MagicLinkErrorScreen } from "@/components/MagicLinkErrorScreen";
 
 import appCss from "../styles.css?url";
 
@@ -78,6 +79,7 @@ function RootComponent() {
   return (
     <ToastProvider>
       <Outlet />
+      <MagicLinkErrorScreen />
     </ToastProvider>
   );
 }
