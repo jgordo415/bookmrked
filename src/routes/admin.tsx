@@ -6,6 +6,7 @@ import { getAdminUsers, checkIsAdmin } from "@/lib/admin.functions";
 import { Loader2, Search, ShieldAlert } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
+  staticData: { sitemap: false },
   ssr: false,
   head: () => ({ meta: [{ title: "Admin — Bookmrked" }] }),
   component: AdminPage,

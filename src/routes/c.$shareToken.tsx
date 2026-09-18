@@ -34,6 +34,7 @@ function ShareError({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createFileRoute("/c/$shareToken")({
+  staticData: { sitemap: true },
   loader: async ({ params }) => {
     const data = await getSharedCollection({ data: { shareToken: params.shareToken } });
     return data;

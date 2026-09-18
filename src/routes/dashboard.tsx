@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/dashboard")({
+  staticData: { sitemap: false },
   component: Dashboard,
 });
 

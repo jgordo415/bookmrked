@@ -1,0 +1,21 @@
+# Bookmrked
+
+> Bookmrked is a personal place-collection app: save the spots worth remembering — coffee shops, record stores, galleries, hidden bars — mark them visited, and share collections with a public link.
+
+Tagline: Save it. Visit it. Come back to it.
+
+## What it does
+
+- Users create themed collections of places (food and drink, coffee and cafés, bars and nightlife, art and museums, music and record shops, books and bookstores, travel and neighborhoods).
+- Each place can be marked visited with a 1–5 star rating and a short note.
+- Collections can be shared publicly via a link — no login required to view a shared collection.
+- Free tier: up to 5 collections and 15 places per collection.
+
+## Pages
+
+- [Home](https://bookmrked.com/): Landing page describing the app and its purpose.
+- Shared collections live at https://bookmrked/c/[share_token] — public, login-free views of a user's collection including visited status and star ratings.
+
+## Contact
+
+- Website: https://bookmrked.com
