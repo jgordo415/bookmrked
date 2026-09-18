@@ -17,6 +17,7 @@ import {
 import { BottomNav } from "@/components/BottomNav";
 
 export const Route = createFileRoute("/profile")({
+  staticData: { sitemap: false },
   component: Profile,
 });
 

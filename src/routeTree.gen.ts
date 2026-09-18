@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -17,6 +18,11 @@ import { Route as CollectionsCollectionIdRouteImport } from './routes/collection
 import { Route as CShareTokenRouteImport } from './routes/c.$shareToken'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -59,6 +65,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/dashboard': typeof DashboardRoute
   '/profile': typeof ProfileRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/c/$shareToken': typeof CShareTokenRoute
   '/collections/$collectionId': typeof CollectionsCollectionIdRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -68,6 +75,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/dashboard': typeof DashboardRoute
   '/profile': typeof ProfileRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/c/$shareToken': typeof CShareTokenRoute
   '/collections/$collectionId': typeof CollectionsCollectionIdRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -78,6 +86,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/dashboard': typeof DashboardRoute
   '/profile': typeof ProfileRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/c/$shareToken': typeof CShareTokenRoute
   '/collections/$collectionId': typeof CollectionsCollectionIdRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -89,6 +98,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/dashboard'
     | '/profile'
+    | '/sitemap.xml'
     | '/c/$shareToken'
     | '/collections/$collectionId'
     | '/lovable/email/queue/process'
@@ -98,6 +108,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/dashboard'
     | '/profile'
+    | '/sitemap.xml'
     | '/c/$shareToken'
     | '/collections/$collectionId'
     | '/lovable/email/queue/process'
@@ -107,6 +118,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/dashboard'
     | '/profile'
+    | '/sitemap.xml'
     | '/c/$shareToken'
     | '/collections/$collectionId'
     | '/lovable/email/queue/process'
@@ -117,6 +129,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   DashboardRoute: typeof DashboardRoute
   ProfileRoute: typeof ProfileRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   CShareTokenRoute: typeof CShareTokenRoute
   CollectionsCollectionIdRoute: typeof CollectionsCollectionIdRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
@@ -124,6 +137,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profile': {
       id: '/profile'
       path: '/profile'
@@ -181,6 +201,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   DashboardRoute: DashboardRoute,
   ProfileRoute: ProfileRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   CShareTokenRoute: CShareTokenRoute,
   CollectionsCollectionIdRoute: CollectionsCollectionIdRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,

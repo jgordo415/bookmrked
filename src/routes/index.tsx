@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import ogImage from "@/assets/og-default.jpg";
 
 export const Route = createFileRoute("/")({
+  staticData: { sitemap: true },
   head: () => {
     const title = "Bookmrked — Save it. Visit it. Come back to it.";
     const description = "A quiet, deliberate place to keep the spots worth remembering — the coffee, the record store, the gallery you walked past twice and finally went in.";
